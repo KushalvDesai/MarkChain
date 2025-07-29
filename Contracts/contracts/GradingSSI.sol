@@ -3,32 +3,38 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-/// @title SSI-Based Academic Grading System
-/// @notice Stores credential metadata on-chain while grades remain off-chain
+/// @title GradingSSI - A Minimal SSI Credential Anchor for Academic Records
+/// @notice Stores hashes of subject-specific VCs on-chain; full credential lives off-chain
 
 contract GradingSSI is AccessControl {
     bytes32 public constant TEACHER_ROLE = keccak256("TEACHER_ROLE");
     bytes32 public constant STUDENT_ROLE = keccak256("STUDENT_ROLE");
 
-    struct Credential {
-        string subject;
-        string ipfsHash; // Off-chain encrypted or public IPFS hash
-        address issuer;  // Teacher's address
-        uint256 issuedAt;
-    }
+    /// @dev Student DID => Subject => Credential
+    mapping(bytes32 => mapping(string => Credential)) private subjectCredentials;
 
-    /// @dev DID => list of credentials
-    mapping(bytes32 => Credential[]) private credentialsByDID;
-
-    /// @dev wallet => DID (hashed as bytes32)
+    /// @dev Address => DID hash
     mapping(address => bytes32) public didRegistry;
 
-    /// @dev (issuer => subject[]) to track allowed subjects
+    /// @dev Teacher => List of assigned subjects
     mapping(address => string[]) public teacherSubjects;
+
+    struct Credential {
+        string ipfsHash;
+        address issuer;
+        uint256 updatedAt;
+    }
 
     /// Events
     event DIDRegistered(address indexed user, bytes32 did);
     event CredentialIssued(bytes32 indexed studentDID, address indexed issuer, string subject, string ipfsHash);
+    event CredentialRevoked(bytes32 indexed studentDID, string subject);
+
+    constructor() {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    // --- Role Guards ---
 
     modifier onlyTeacher() {
         require(hasRole(TEACHER_ROLE, msg.sender), "Not a teacher");
@@ -40,11 +46,8 @@ contract GradingSSI is AccessControl {
         _;
     }
 
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
+    // --- DID Registration ---
 
-    /// Register user DID (can be called once per user)
     function registerDID(string calldata did) external {
         require(didRegistry[msg.sender] == bytes32(0), "DID already registered");
         bytes32 hashedDID = keccak256(abi.encodePacked(did));
@@ -52,54 +55,76 @@ contract GradingSSI is AccessControl {
         emit DIDRegistered(msg.sender, hashedDID);
     }
 
-    /// Admin assigns roles
+    // --- Role Management ---
+
     function assignRole(address user, bytes32 role) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _grantRole(role, user);
     }
 
-    /// Admin assigns subject(s) to a teacher
+    // --- Subject Assignment ---
+
     function assignSubjectToTeacher(address teacher, string calldata subject) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(hasRole(TEACHER_ROLE, teacher), "Not a teacher");
         teacherSubjects[teacher].push(subject);
     }
 
-    /// Teacher issues credential to a student DID
-    function issueCredential(address student, string calldata subject, string calldata ipfsHash) external onlyTeacher {
-        require(didRegistry[student] != bytes32(0), "Student DID not registered");
-        bytes32 studentDID = didRegistry[student];
-        require(_teacherHasSubject(msg.sender, subject), "Not authorized to issue for this subject");
+    function removeSubjectFromTeacher(address teacher, string calldata subject) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(hasRole(TEACHER_ROLE, teacher), "Not a teacher");
+        string[] storage subjects = teacherSubjects[teacher];
+        for (uint i = 0; i < subjects.length; i++) {
+            if (keccak256(bytes(subjects[i])) == keccak256(bytes(subject))) {
+                subjects[i] = subjects[subjects.length - 1];
+                subjects.pop();
+                break;
+            }
+        }
+    }
 
-        Credential memory cred = Credential({
-            subject: subject,
+    // --- Credential Issuance / Update ---
+
+    function issueOrUpdateCredential(
+        address student,
+        string calldata subject,
+        string calldata ipfsHash
+    ) external onlyTeacher {
+        require(didRegistry[student] != bytes32(0), "Student DID not registered");
+        require(_teacherHasSubject(msg.sender, subject), "Unauthorized subject");
+
+        bytes32 studentDID = didRegistry[student];
+
+        subjectCredentials[studentDID][subject] = Credential({
             ipfsHash: ipfsHash,
             issuer: msg.sender,
-            issuedAt: block.timestamp
+            updatedAt: block.timestamp
         });
 
-        credentialsByDID[studentDID].push(cred);
         emit CredentialIssued(studentDID, msg.sender, subject, ipfsHash);
     }
 
-    /// Student can fetch their credentials
-    function getMyCredentials() external view onlyStudent returns (Credential[] memory) {
-        return credentialsByDID[didRegistry[msg.sender]];
-    }
+    // --- Credential Revocation (Event Only) ---
 
-    /// Teacher can fetch credentials they issued to a specific student
-    function getIssuedCredentials(address student) external view onlyTeacher returns (Credential[] memory) {
+    function revokeCredential(address student, string calldata subject) external onlyRole(DEFAULT_ADMIN_ROLE) {
         bytes32 studentDID = didRegistry[student];
-        Credential[] memory creds = credentialsByDID[studentDID];
-
-        // Optional: Add filtering logic here by issuer/subject
-        return creds;
+        emit CredentialRevoked(studentDID, subject);
     }
 
-    /// Admin can fetch credentials for any student
-    function getCredentialsForStudent(address student) external view onlyRole(DEFAULT_ADMIN_ROLE) returns (Credential[] memory) {
-        return credentialsByDID[didRegistry[student]];
+    // --- Credential Access ---
+
+    function getMySubjectCredential(string calldata subject) external view onlyStudent returns (Credential memory) {
+        return subjectCredentials[didRegistry[msg.sender]][subject];
     }
 
-    /// Internal helper to check subject ownership
+    function getStudentSubjectCredential(address student, string calldata subject)
+        external
+        view
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        returns (Credential memory)
+    {
+        return subjectCredentials[didRegistry[student]][subject];
+    }
+
+    // --- Internal Helpers ---
+
     function _teacherHasSubject(address teacher, string calldata subject) internal view returns (bool) {
         string[] memory subjects = teacherSubjects[teacher];
         for (uint i = 0; i < subjects.length; i++) {
