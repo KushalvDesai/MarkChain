@@ -387,9 +387,9 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
           }
         `}
       </style>
-      <div className="relative bg-neutral-900 min-h-[120px]" ref={containerRef}>
+      <div className="relative bg-neutral-900 min-h-[70px]" ref={containerRef}>
         {/* Header with App Name, Navigation, and User Actions */}
-        <div className="flex justify-between items-center text-white px-6 py-4">
+        <div className="flex justify-between items-center text-white px-6 py-2">
           {/* App Name */}
           <button 
             onClick={() => router.push('/student')}
@@ -423,7 +423,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
                       href={item.href}
                       onClick={(e) => handleClick(e, index)}
                       onKeyDown={(e) => handleKeyDown(e, index)}
-                      className="outline-none py-[0.6em] px-[1em] inline-block hover:text-blue-400 transition-colors"
+                      className="outline-none py-[0.4em] px-[0.8em] inline-block hover:text-blue-400 transition-colors"
                     >
                       {item.label}
                     </a>
