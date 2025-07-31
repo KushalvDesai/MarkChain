@@ -20,8 +20,8 @@ export class User {
   @Prop({ type: String, enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
 
-  @Prop()
-  nonce: string;
+  @Prop({ type: String, required: false })
+  nonce?: string;
 
   @Prop()
   name?: string;
