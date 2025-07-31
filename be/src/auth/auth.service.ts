@@ -1,0 +1,124 @@
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
+import { ethers } from 'ethers';
+import { User, UserDocument } from '../schemas/user.schema';
+import { randomBytes } from 'crypto';
+
+export interface NonceResponse {
+  nonce: string;
+  message: string;
+}
+
+export interface VerifySignatureDto {
+  walletAddress: string;
+  signature: string;
+  nonce: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  user: {
+    walletAddress: string;
+    did: string;
+    role: string;
+  };
+}
+
+@Injectable()
+export class AuthService {
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private jwtService: JwtService,
+  ) {}
+
+  async generateNonce(walletAddress: string): Promise<NonceResponse> {
+    if (!ethers.isAddress(walletAddress)) {
+      throw new BadRequestException('Invalid wallet address');
+    }
+
+    const nonce = randomBytes(32).toString('hex');
+    const message = `Sign this message to authenticate with MarkChain.\n\nNonce: ${nonce}\nWallet: ${walletAddress}`;
+
+    // Store nonce in user document (create user if doesn't exist)
+    await this.userModel.findOneAndUpdate(
+      { walletAddress: walletAddress.toLowerCase() },
+      { 
+        nonce,
+        walletAddress: walletAddress.toLowerCase()
+      },
+      { upsert: true, new: true }
+    );
+
+    return { nonce, message };
+  }
+
+  async verifySignature(verifyDto: VerifySignatureDto): Promise<AuthResponse> {
+    const { walletAddress, signature, nonce } = verifyDto;
+
+    if (!ethers.isAddress(walletAddress)) {
+      throw new BadRequestException('Invalid wallet address');
+    }
+
+    // Find user with matching nonce
+    const user = await this.userModel.findOne({
+      walletAddress: walletAddress.toLowerCase(),
+      nonce
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid nonce or wallet address');
+    }
+
+    // Verify signature
+    const message = `Sign this message to authenticate with MarkChain.\n\nNonce: ${nonce}\nWallet: ${walletAddress}`;
+    
+    try {
+      const recoveredAddress = ethers.verifyMessage(message, signature);
+      
+      if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+        throw new UnauthorizedException('Invalid signature');
+      }
+    } catch (error) {
+      throw new UnauthorizedException('Invalid signature');
+    }
+
+    // Create DID if user doesn't have one
+    if (!user.did) {
+      user.did = `did:ethr:${walletAddress.toLowerCase()}`;
+    }
+
+    // Update last login and clear nonce
+    user.lastLogin = new Date();
+    user.nonce = undefined;
+    await user.save();
+
+    // Generate JWT token
+    const payload = {
+      sub: user._id,
+      walletAddress: user.walletAddress,
+      did: user.did,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      user: {
+        walletAddress: user.walletAddress,
+        did: user.did,
+        role: user.role,
+      },
+    };
+  }
+
+  async validateUser(userId: string): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('User not found or inactive');
+    }
+    return user;
+  }
+}
