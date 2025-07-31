@@ -72,3 +72,8 @@ node_modules
 
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
+
+# Environment variables
+.env
+.env.local
+.env.production

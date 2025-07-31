@@ -1,0 +1,71 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type NonceResponse {
+  nonce: String!
+  message: String!
+}
+
+type UserInfo {
+  walletAddress: String!
+  did: String!
+  role: String!
+}
+
+type AuthResponse {
+  accessToken: String!
+  user: UserInfo!
+}
+
+type UserDto {
+  _id: ID!
+  walletAddress: String!
+  did: String!
+  role: UserRole!
+  name: String
+  email: String
+  subjects: [String!]
+  isActive: Boolean!
+  lastLogin: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""User roles in the system"""
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  me: String!
+  getAllStudentsWithSubject(subject: String!): [UserDto!]!
+  getUsersByRole(role: UserRole!): [UserDto!]!
+  getUserProfile(walletAddress: String!): UserDto!
+  getAllUsers: [UserDto!]!
+}
+
+type Mutation {
+  generateNonce(walletAddress: String!): NonceResponse!
+  verifySignature(input: VerifySignatureInput!): AuthResponse!
+  updateUserProfile(input: UpdateUserProfileDto!): UserDto!
+}
+
+input VerifySignatureInput {
+  walletAddress: String!
+  signature: String!
+  nonce: String!
+}
+
+input UpdateUserProfileDto {
+  name: String
+  email: String
+  subjects: [String!]
+}
