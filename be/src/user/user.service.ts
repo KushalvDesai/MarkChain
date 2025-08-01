@@ -16,7 +16,9 @@ export class UserService {
       role: UserRole.STUDENT,
       subjects: subject,
       isActive: true,
-    }).select('-nonce').exec();
+    })
+    .select('-nonce')
+    .exec();
 
     return students;
   }
@@ -25,7 +27,9 @@ export class UserService {
     const users = await this.userModel.find({
       role: role,
       isActive: true,
-    }).select('-nonce').exec();
+    })
+    .select('-nonce')
+    .exec();
 
     return users;
   }
@@ -34,7 +38,9 @@ export class UserService {
     const user = await this.userModel.findOne({
       walletAddress: walletAddress.toLowerCase(),
       isActive: true,
-    }).select('-nonce').exec();
+    })
+    .select('-nonce')
+    .exec();
 
     if (!user) {
       throw new NotFoundException(`User with wallet address ${walletAddress} not found`);
@@ -54,7 +60,9 @@ export class UserService {
       },
       { $set: updateData },
       { new: true }
-    ).select('-nonce').exec();
+    )
+    .select('-nonce')
+    .exec();
 
     if (!user) {
       throw new NotFoundException(`User with wallet address ${walletAddress} not found`);
@@ -64,6 +72,9 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<any[]> {
-    return this.userModel.find({ isActive: true }).select('-nonce').exec();
+    return this.userModel
+      .find({ isActive: true })
+      .select('-nonce')
+      .exec();
   }
 }
