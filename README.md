@@ -193,18 +193,8 @@ We welcome contributions! Please follow these steps:
 
 ![Contributor Stats](https://contrib.rocks/image?repo=KushalvDesai/MarkChain)
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="https://github-readme-stats.vercel.app/api/repo-extra-cards?username=KushalvDesai&repo=MarkChain&theme=tokyonight&hide_border=true" alt="MarkChain Repository Stats" />
-    </td>
-    <td align="center">
-      <img src="https://github-readme-streak-stats.herokuapp.com/?user=KushalvDesai&theme=tokyonight&hide_border=true" alt="Contribution Streak" />
-    </td>
-  </tr>
-</table>
-
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=KushalvDesai&repo=MarkChain&theme=tokyo-night&hide_border=true&area=true" alt="MarkChain Contribution Graph" />
+### **MarkChain Repository Activity**
+<img src="https://github-readme-stats.vercel.app/api/pin/?username=KushalvDesai&repo=MarkChain&theme=tokyonight&hide_border=true&show_owner=true" alt="MarkChain Repository" />
 
 ### **Repository Analytics**
 ![GitHub Repo Size](https://img.shields.io/github/repo-size/KushalvDesai/MarkChain?style=flat-square&color=blue)
@@ -213,9 +203,13 @@ We welcome contributions! Please follow these steps:
 ![GitHub issues](https://img.shields.io/github/issues/KushalvDesai/MarkChain?style=flat-square&color=red)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/KushalvDesai/MarkChain?style=flat-square&color=yellow)
 ![GitHub contributors](https://img.shields.io/github/contributors/KushalvDesai/MarkChain?style=flat-square&color=purple)
+![GitHub forks](https://img.shields.io/github/forks/KushalvDesai/MarkChain?style=flat-square&color=cyan)
+![GitHub stars](https://img.shields.io/github/stars/KushalvDesai/MarkChain?style=flat-square&color=gold)
 
-### **MarkChain Repository Stats**
-<img src="https://github-readme-stats.vercel.app/api/pin/?username=KushalvDesai&repo=MarkChain&theme=tokyonight&hide_border=true" alt="MarkChain Repository" />
+### **Language Distribution in MarkChain**
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=KushalvDesai&repo=MarkChain&layout=compact&theme=tokyonight&hide_border=true" alt="MarkChain Languages" />
+
+</div>
 
 </div>
 
