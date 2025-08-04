@@ -196,15 +196,15 @@ We welcome contributions! Please follow these steps:
 <table>
   <tr>
     <td align="center">
-      <img src="https://github-readme-stats.vercel.app/api?username=KushalvDesai&show_icons=true&theme=tokyonight&hide_border=true" alt="Kushal's GitHub Stats" />
+      <img src="https://github-readme-stats.vercel.app/api/repo-extra-cards?username=KushalvDesai&repo=MarkChain&theme=tokyonight&hide_border=true" alt="MarkChain Repository Stats" />
     </td>
     <td align="center">
-      <img src="https://github-readme-stats.vercel.app/api?username=ShreyLakhtaria&show_icons=true&theme=tokyonight&hide_border=true" alt="Shrey's GitHub Stats" />
+      <img src="https://github-readme-streak-stats.herokuapp.com/?user=KushalvDesai&theme=tokyonight&hide_border=true" alt="Contribution Streak" />
     </td>
   </tr>
 </table>
 
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=KushalvDesai&theme=tokyo-night&hide_border=true&area=true" alt="Contribution Graph" />
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=KushalvDesai&repo=MarkChain&theme=tokyo-night&hide_border=true&area=true" alt="MarkChain Contribution Graph" />
 
 ### **Repository Analytics**
 ![GitHub Repo Size](https://img.shields.io/github/repo-size/KushalvDesai/MarkChain?style=flat-square&color=blue)
@@ -212,41 +212,21 @@ We welcome contributions! Please follow these steps:
 ![GitHub last commit](https://img.shields.io/github/last-commit/KushalvDesai/MarkChain?style=flat-square&color=orange)
 ![GitHub issues](https://img.shields.io/github/issues/KushalvDesai/MarkChain?style=flat-square&color=red)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/KushalvDesai/MarkChain?style=flat-square&color=yellow)
+![GitHub contributors](https://img.shields.io/github/contributors/KushalvDesai/MarkChain?style=flat-square&color=purple)
 
-### **Language Distribution**
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=KushalvDesai&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" />
+### **MarkChain Repository Stats**
+<img src="https://github-readme-stats.vercel.app/api/pin/?username=KushalvDesai&repo=MarkChain&theme=tokyonight&hide_border=true" alt="MarkChain Repository" />
 
 </div>
 
----
+</div>
 
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2025 Kushal Desai & Shrey Lakhtaria
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-```
-
----
 
 ## 👥 Authors
 
 ### **Core Team**
-- **[Kushal Desai](https://github.com/KushalvDesai)** - Full Stack Developer & Blockchain Architect
-- **[Shrey Lakhtaria](https://github.com/ShreyLakhtaria)** - Frontend Developer & UI/UX Designer
+- **[Kushal Desai](https://github.com/KushalvDesai)** - Frontend Developer & Blockchain Architect
+- **[Shrey Lakhtaria](https://github.com/ShreyLakhtaria)** - Backend Developer & Blockchain Architect
 
 ### **Contributors**
 Want to see your name here? [Contribute to MarkChain!](#-contributing)
