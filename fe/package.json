@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
-    "@types/three": "^0.178.1",
     "@types/react-is": "^19.0.0",
+    "@types/three": "^0.178.1",
     "dotenv": "^17.2.1",
     "graphql": "^16.11.0",
     "gsap": "^3.13.0",

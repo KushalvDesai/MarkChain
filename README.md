@@ -130,157 +130,7 @@ npx hardhat run scripts/deploy.ts --network localhost
 
 ---
 
-## 🔧 Technology Stack
-
-### **Frontend**
-- **Framework**: Next.js 15.4.4 with App Router
-- **Language**: TypeScript 5.x
-- **Styling**: TailwindCSS 4.x with Glassmorphism
-- **Animations**: GSAP, Three.js, PostProcessing
-- **State Management**: Apollo Client for GraphQL
-- **Charts**: Recharts for analytics visualization
-
-### **Backend**
-- **Framework**: NestJS 11.0.1
-- **API**: GraphQL with Apollo Server
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT with Passport.js
-- **Blockchain**: Ethers.js for smart contract interaction
-- **Identity**: DID-JWT for Self-Sovereign Identity
-
-### **Blockchain**
-- **Platform**: Ethereum-compatible networks
-- **Development**: Hardhat 2.26.1
-- **Language**: Solidity 0.8.20
-- **Standards**: ERC-721 for credential NFTs
-- **Access Control**: OpenZeppelin contracts
-
-### **DevOps & Tools**
-- **Version Control**: Git with GitHub
-- **Package Manager**: npm/yarn/pnpm
-- **Linting**: ESLint with TypeScript rules
-- **Testing**: Jest for unit tests, Hardhat for contracts
-
----
-
-## 📚 API Documentation
-
-### GraphQL Endpoints
-
-#### **Authentication**
-```graphql
-# User login
-mutation Login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    access_token
-    user { id, email, role }
-  }
-}
-
-# User registration
-mutation Register($userData: CreateUserInput!) {
-  register(userData: $userData) {
-    id
-    email
-    role
-  }
-}
-```
-
-#### **Credentials**
-```graphql
-# Get user credentials
-query GetCredentials($userId: String!) {
-  credentials(userId: $userId) {
-    id
-    subject
-    grade
-    issuer
-    blockchainTxHash
-    createdAt
-  }
-}
-
-# Issue new credential
-mutation IssueCredential($credentialData: CreateCredentialInput!) {
-  issueCredential(credentialData: $credentialData) {
-    id
-    blockchainTxHash
-    ipfsHash
-  }
-}
-```
-
-### Smart Contract Interface
-
-#### **GradingSSI Contract**
-```solidity
-// Register DID for user
-function registerDID(bytes32 _did) external
-
-// Issue credential for subject
-function issueCredential(
-    bytes32 _studentDID,
-    string memory _subject,
-    string memory _ipfsHash
-) external onlyTeacher
-
-// Verify credential
-function verifyCredential(
-    bytes32 _studentDID,
-    string memory _subject
-) external view returns (Credential memory)
-```
-
----
-
-## 🎨 UI Components
-
-### **Key Components**
-- **MagicBento**: Interactive particle animation system
-- **Hyperspeed**: 3D highway background animation
-- **GooeyNav**: Fluid navigation with particle effects
-- **StudentMarks**: Grade visualization dashboard
-- **Analytics**: Performance charts and insights
-
-### **Design System**
-- **Color Palette**: Purple/Blue gradient theme
-- **Typography**: Modern sans-serif fonts
-- **Effects**: Glassmorphism, blur, and glow effects
-- **Animations**: Smooth transitions and micro-interactions
-
----
-
-## 📱 User Roles
-
-### 👨‍🎓 **Students**
-- View personal academic dashboard
-- Access credential portfolio
-- Generate verification QR codes
-- Track academic progress
-- Control credential sharing permissions
-
-### 👨‍🏫 **Teachers**
-- Issue subject-specific credentials
-- Update student grades
-- Manage assigned subjects
-- Verify credential authenticity
-
-### 🏛️ **Institutions**
-- Manage teacher assignments
-- Oversee credential issuance
-- Generate institutional reports
-- Maintain academic integrity
-
-### 💼 **Employers/Verifiers**
-- Instant credential verification
-- Access verification portal
-- Validate blockchain records
-- Generate verification reports
-
----
-
-## 🔒 Security Features
+##  Security Features
 
 ### **Blockchain Security**
 - Smart contract access controls
@@ -299,85 +149,6 @@ function verifyCredential(
 - IPFS content addressing
 - Blockchain anchoring
 - Tamper-evident records
-
----
-
-## 🧪 Testing
-
-### **Frontend Testing**
-```bash
-cd fe
-npm run test        # Unit tests
-npm run test:e2e    # End-to-end tests
-npm run lint        # Code linting
-```
-
-### **Backend Testing**
-```bash
-cd be
-npm run test        # Unit tests
-npm run test:e2e    # Integration tests
-npm run test:cov    # Coverage report
-```
-
-### **Smart Contract Testing**
-```bash
-cd Contracts
-npx hardhat test                    # Contract tests
-npx hardhat coverage               # Coverage report
-npx hardhat test --network sepolia # Testnet testing
-```
-
----
-
-## 🚀 Deployment
-
-### **Production Deployment**
-
-#### **Frontend (Vercel)**
-```bash
-cd fe
-npm run build
-# Deploy to Vercel or your preferred platform
-```
-
-#### **Backend (Railway/Heroku)**
-```bash
-cd be
-npm run build
-npm run start:prod
-```
-
-#### **Smart Contracts (Mainnet)**
-```bash
-cd Contracts
-npx hardhat run scripts/deploy.ts --network mainnet
-npx hardhat verify --network mainnet DEPLOYED_CONTRACT_ADDRESS
-```
-
-### **Environment Configuration**
-
-#### **Frontend (.env.local)**
-```env
-NEXT_PUBLIC_API_URL=https://api.markchain.com
-NEXT_PUBLIC_BLOCKCHAIN_NETWORK=mainnet
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x...
-```
-
-#### **Backend (.env)**
-```env
-DATABASE_URL=mongodb://localhost:27017/markchain
-JWT_SECRET=your-super-secret-jwt-key
-BLOCKCHAIN_RPC_URL=https://mainnet.infura.io/v3/your-key
-CONTRACT_ADDRESS=0x...
-```
-
-#### **Contracts (.env)**
-```env
-PRIVATE_KEY=your-deployer-private-key
-INFURA_PROJECT_ID=your-infura-project-id
-ETHERSCAN_API_KEY=your-etherscan-api-key
-```
 
 ---
 
@@ -413,6 +184,39 @@ We welcome contributions! Please follow these steps:
 - Maintain test coverage above 80%
 - Use conventional commit messages
 - Update documentation for new features
+
+---
+
+## 📈 Project Statistics
+
+<div align="center">
+
+![Contributor Stats](https://contrib.rocks/image?repo=KushalvDesai/MarkChain)
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://github-readme-stats.vercel.app/api?username=KushalvDesai&show_icons=true&theme=tokyonight&hide_border=true" alt="Kushal's GitHub Stats" />
+    </td>
+    <td align="center">
+      <img src="https://github-readme-stats.vercel.app/api?username=ShreyLakhtaria&show_icons=true&theme=tokyonight&hide_border=true" alt="Shrey's GitHub Stats" />
+    </td>
+  </tr>
+</table>
+
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=KushalvDesai&theme=tokyo-night&hide_border=true&area=true" alt="Contribution Graph" />
+
+### **Repository Analytics**
+![GitHub Repo Size](https://img.shields.io/github/repo-size/KushalvDesai/MarkChain?style=flat-square&color=blue)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/KushalvDesai/MarkChain?style=flat-square&color=green)
+![GitHub last commit](https://img.shields.io/github/last-commit/KushalvDesai/MarkChain?style=flat-square&color=orange)
+![GitHub issues](https://img.shields.io/github/issues/KushalvDesai/MarkChain?style=flat-square&color=red)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/KushalvDesai/MarkChain?style=flat-square&color=yellow)
+
+### **Language Distribution**
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=KushalvDesai&layout=compact&theme=tokyonight&hide_border=true" alt="Top Languages" />
+
+</div>
 
 ---
 
