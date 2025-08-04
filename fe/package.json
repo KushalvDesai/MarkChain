@@ -10,11 +10,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
-<<<<<<< HEAD
     "@types/three": "^0.178.1",
-=======
     "@types/react-is": "^19.0.0",
->>>>>>> 0c89e0654420fba0ebecb95d17fb79ce41a3fd81
     "dotenv": "^17.2.1",
     "graphql": "^16.11.0",
     "gsap": "^3.13.0",
@@ -22,13 +19,9 @@
     "postprocessing": "^6.37.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-<<<<<<< HEAD
+    "react-is": "^19.1.1",
     "recharts": "^3.1.0",
     "three": "^0.178.0"
-=======
-    "react-is": "^19.1.1",
-    "recharts": "^3.1.0"
->>>>>>> 0c89e0654420fba0ebecb95d17fb79ce41a3fd81
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
