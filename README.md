@@ -463,19 +463,18 @@ Want to see your name here? [Contribute to MarkChain!](#-contributing)
 ## 📞 Support
 
 ### **Get Help**
-- 📧 **Email**: support@markchain.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/KushalvDesai/MarkChain/issues)
-- 📖 **Documentation**: [docs.markchain.com](https://docs.markchain.com)
+<!-- - 📖 **Documentation**: [docs.markchain.com](https://docs.markchain.com) -->
 
 ### **Community**
 - 🌟 **Star** this repository if you find it helpful
-- 💼 **Connect** on [LinkedIn](https://linkedin.com/company/markchain)
+- 💼 **Connect** on Linkedin- [Kushal](https://linkedin.com/in/kushalvdesai/) / [Shrey](https://www.linkedin.com/in/shrey-lakhataria)
 
 ---
 
 <div align="center">
 
-**Made with by **
+**Made by Kushal Desai & Shrey Lakhtaria**
 
 [⬆ Back to Top](#markchain-️)
 
