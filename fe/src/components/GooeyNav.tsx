@@ -41,7 +41,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   // Determine active index based on current pathname
   const getActiveIndexFromPath = () => {
     const currentIndex = items.findIndex(item => item.href === pathname);
-    return currentIndex !== -1 ? currentIndex : initialActiveIndex;
+    return currentIndex !== -1 ? currentIndex : -1; // Return -1 if no match found
   };
 
   const [activeIndex, setActiveIndex] = useState<number>(getActiveIndexFromPath());
@@ -224,19 +224,42 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   
   useEffect(() => {
     if (!navRef.current || !containerRef.current) return;
-    const activeLi = navRef.current.querySelectorAll("li")[
-      activeIndex
-    ] as HTMLElement;
-    if (activeLi) {
-      updateEffectPosition(activeLi);
-      textRef.current?.classList.add("active");
-    }
-    const resizeObserver = new ResizeObserver(() => {
-      const currentActiveLi = navRef.current?.querySelectorAll("li")[
+    
+    // Only apply active effects if activeIndex is valid (not -1)
+    if (activeIndex >= 0) {
+      const activeLi = navRef.current.querySelectorAll("li")[
         activeIndex
       ] as HTMLElement;
-      if (currentActiveLi) {
-        updateEffectPosition(currentActiveLi);
+      if (activeLi) {
+        updateEffectPosition(activeLi);
+        textRef.current?.classList.add("active");
+      }
+      // Show the effect elements
+      if (filterRef.current) {
+        filterRef.current.style.opacity = "1";
+      }
+      if (textRef.current) {
+        textRef.current.style.opacity = "1";
+      }
+    } else {
+      // Hide and remove active effects when no item should be selected
+      if (textRef.current) {
+        textRef.current.classList.remove("active");
+        textRef.current.style.opacity = "0";
+      }
+      if (filterRef.current) {
+        filterRef.current.style.opacity = "0";
+      }
+    }
+    
+    const resizeObserver = new ResizeObserver(() => {
+      if (activeIndex >= 0) {
+        const currentActiveLi = navRef.current?.querySelectorAll("li")[
+          activeIndex
+        ] as HTMLElement;
+        if (currentActiveLi) {
+          updateEffectPosition(currentActiveLi);
+        }
       }
     });
     resizeObserver.observe(containerRef.current);
@@ -392,7 +415,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
         <div className="flex justify-between items-center text-white px-6 py-2">
           {/* App Name */}
           <button 
-            onClick={() => router.push('/student')}
+            onClick={() => router.push('/')}
             className="text-2xl font-bold hover:text-blue-400 transition-colors"
           >
             MarkChain

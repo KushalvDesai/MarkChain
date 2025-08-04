@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <GooeyNav 
       items={navItems}
-      initialActiveIndex={0}
+      initialActiveIndex={-1}
       colors={[1, 2, 3, 4]}
       particleCount={12}
       animationTime={500}
