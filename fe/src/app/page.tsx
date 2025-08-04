@@ -88,7 +88,7 @@ export default function HomePage() {
       >
         
         {/* Section 1: Project Identity */}
-        <section className="h-screen flex items-center justify-center text-center px-6">
+        <section className="h-screen flex items-center justify-center text-center px-6 relative">
           <div 
             className="animate-fade-in"
             style={{
@@ -99,9 +99,30 @@ export default function HomePage() {
             <h1 className="text-7xl md:text-9xl font-bold text-white mb-6 tracking-tight">
               MarkChain
             </h1>
-            <p className="text-2xl md:text-3xl text-gray-300 font-light">
+            <p className="text-2xl md:text-3xl text-gray-300 font-light mb-16">
               Academic Identity. <span className="text-blue-400">Decentralized.</span>
             </p>
+            
+            {/* Scroll Indicator */}
+            <div className="flex flex-col items-center space-y-2 animate-bounce">
+              <p className="text-gray-400 text-sm font-light tracking-wide uppercase">
+                Scroll to explore
+              </p>
+              <div className="w-px h-8 bg-gradient-to-b from-gray-400 to-transparent"></div>
+              <svg 
+                className="w-4 h-4 text-gray-400" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={1.5} 
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </div>
           </div>
         </section>
 
