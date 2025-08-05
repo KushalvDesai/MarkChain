@@ -8,7 +8,7 @@ async function generateTestSignature() {
   console.log('Your MetaMask Wallet Address:', wallet.address);
   
   // STEP 1: Replace this nonce with the actual nonce from your GraphQL response
-  const nonce = 'e733eed6421a6db96bdeffb5d381ab928a6099fb01519022e47c043d3ddeecbc';
+  const nonce = '74fd6ef01392baeaa8906fd913eea171f22392022602903509e58d1f1a8cf016';
   const walletAddress = wallet.address;
   
   const message = `Sign this message to authenticate with MarkChain.\n\nNonce: ${nonce}\nWallet: ${walletAddress}`;
