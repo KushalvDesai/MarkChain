@@ -30,7 +30,15 @@ import { getDatabaseConfig } from './config/database.config';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       introspection: true,
-      context: ({ req }) => ({ req }),
+      context: ({ req, res, connection }) => {
+        if (req) {
+          return { req, res };
+        }
+        if (connection) {
+          return { req: connection.context, res: connection.context.res };
+        }
+        return { req: {}, res: {} };
+      },
     }),
     
     // Feature Modules

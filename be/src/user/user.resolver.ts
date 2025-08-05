@@ -38,6 +38,7 @@ export class UserResolver {
   }
 
   @Query(() => [UserDto])
+  @UseGuards(JwtAuthGuard)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async getAllUsers(): Promise<UserDto[]> {
