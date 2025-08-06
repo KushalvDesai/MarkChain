@@ -1,0 +1,199 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useGetUserProfile } from "@/hooks/useGraphQL";
+import Navbar from "@/components/Navbar";
+import MagicBento from "@/components/MagicBento";
+import ProfileInfo from "@/components/ProfileInfo";
+import BlockchainInfo from "@/components/BlockchainInfo";
+import ProfileStats from "@/components/ProfileStats";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
+interface UserProfile {
+  walletAddress: string;
+  name?: string;
+  email?: string;
+  role: string;
+  subjects?: string[];
+  isActive?: boolean;
+  did?: string;
+  lastLogin?: string;
+}
+
+export default function ProfilePage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subjects: [] as string[]
+  });
+
+  // Fetch user profile using GraphQL
+  const { data, loading, error, refetch } = useGetUserProfile(user?.walletAddress || "");
+
+  // Update form data when profile data loads
+  useEffect(() => {
+    if (data?.getUserProfile) {
+      const profile = data.getUserProfile;
+      setFormData({
+        name: profile.name || "",
+        email: profile.email || "",
+        subjects: profile.subjects || []
+      });
+    }
+  }, [data]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubjectAdd = (subject: string) => {
+    if (subject.trim() && !formData.subjects.includes(subject.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        subjects: [...prev.subjects, subject.trim()]
+      }));
+    }
+  };
+
+  const handleSubjectRemove = (subject: string) => {
+    setFormData(prev => ({
+      ...prev,
+      subjects: prev.subjects.filter(s => s !== subject)
+    }));
+  };
+
+  const handleSave = async () => {
+    // TODO: Implement update mutation when available
+    console.log('Saving profile:', formData);
+    setIsEditing(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950">
+        <Navbar />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+            <p className="text-gray-300">Loading profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-950">
+        <Navbar />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <div className="text-red-400 mb-4">
+              <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.27 15.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold mb-2 text-white">Error Loading Profile</h2>
+            <p className="text-gray-300 mb-4">{error.message}</p>
+            <button
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const profile = data?.getUserProfile;
+
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-950">
+        {/* Navbar */}
+        <Navbar />
+        
+        {/* Welcome Message */}
+        <div className="p-6 pb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Profile Settings
+          </h1>
+          <p className="text-gray-400">
+            Manage your account information and blockchain identity
+          </p>
+        </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 pt-4 h-[calc(100vh-160px)]">
+        {/* Profile Information */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/10 before:via-transparent before:to-transparent before:rounded-2xl">
+          <MagicBento 
+            textAutoHide={true}
+            enableStars={false}
+            enableSpotlight={true}
+            enableBorderGlow={true}
+            enableTilt={false}
+            enableMagnetism={false}
+            clickEffect={true}
+            spotlightRadius={500}
+            particleCount={12}
+            glowColor="132, 0, 255"
+            cards={[{
+              color: "transparent",
+              title: "Profile Information",
+              description: "Manage your personal details",
+              label: "Profile",
+              children: <ProfileInfo 
+                profile={profile}
+                userAddress={user?.walletAddress || ""}
+                isEditing={isEditing}
+                formData={formData}
+                onInputChange={handleInputChange}
+                onSubjectAdd={handleSubjectAdd}
+                onSubjectRemove={handleSubjectRemove}
+                onToggleEdit={() => setIsEditing(!isEditing)}
+                onSave={handleSave}
+              />
+            }]}
+          />
+        </div>
+        
+        {/* Blockchain Information */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/10 before:via-transparent before:to-transparent before:rounded-2xl">
+          <MagicBento 
+            textAutoHide={true}
+            enableStars={false}
+            enableSpotlight={true}
+            enableBorderGlow={true}
+            enableTilt={false}
+            enableMagnetism={false}
+            clickEffect={true}
+            spotlightRadius={300}
+            particleCount={8}
+            glowColor="132, 0, 255"
+            cards={[{
+              color: "transparent",
+              title: "Blockchain Identity",
+              description: "Your Web3 credentials",
+              label: "Blockchain",
+              children: <BlockchainInfo 
+                profile={profile}
+                userAddress={user?.walletAddress || ""}
+              />
+            }]}
+          />
+        </div>
+      </div>
+      </div>
+    </ProtectedRoute>
+  );
+}

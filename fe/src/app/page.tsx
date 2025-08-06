@@ -298,14 +298,6 @@ export default function HomePage() {
             
             <MetaMaskLoginButton />
             
-            <div className="mt-8">
-              <Link 
-                href="/student" 
-                className="text-gray-400 hover:text-white transition-colors duration-300 text-sm underline"
-              >
-                Or browse as guest
-              </Link>
-            </div>
           </div>
         </section>
       </div>

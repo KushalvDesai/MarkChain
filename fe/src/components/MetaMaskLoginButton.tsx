@@ -52,7 +52,7 @@ export default function MetaMaskLoginButton() {
       <button
         onClick={handleLogin}
         disabled={isConnecting}
-        className="shadow-[inset_0_0_0_2px_#616467] text-black px-12 py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="shadow-[inset_0_0_0_2px_#616467] text-white px-12 py-3 rounded-full tracking-wide uppercase font-semibold bg-transparent hover:bg-[#616467] hover:text-white transition duration-300 text-sm"
       >
         {isConnecting ? 'Connecting...' : 'Connect Wallet'}
       </button>
