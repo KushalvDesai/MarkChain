@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { 
   GENERATE_NONCE, 
   VERIFY_SIGNATURE,
+  UPDATE_USER_PROFILE,
   GET_ALL_USERS,
   GET_USER_PROFILE,
   GET_USERS_BY_ROLE,
@@ -21,6 +22,11 @@ export const useGenerateNonce = () => {
 
 export const useVerifySignature = () => {
   return useMutation<VerifySignatureResponse, { input: VerifySignatureInput }>(VERIFY_SIGNATURE);
+};
+
+// User Mutation Hooks
+export const useUpdateUserProfile = () => {
+  return useMutation(UPDATE_USER_PROFILE);
 };
 
 // User Query Hooks

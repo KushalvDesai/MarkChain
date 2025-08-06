@@ -2,11 +2,14 @@
 
 import { ApolloProvider } from "@apollo/client";
 import { client } from "@/lib/apollo";
+import { AuthProvider } from "@/hooks/useAuth";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ApolloProvider client={client}>
-      {children}
-    </ApolloProvider>
+    <AuthProvider>
+      <ApolloProvider client={client}>
+        {children}
+      </ApolloProvider>
+    </AuthProvider>
   );
 }

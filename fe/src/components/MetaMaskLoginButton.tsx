@@ -3,22 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMetaMaskAuth } from "@/hooks/useMetaMaskAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function MetaMaskLoginButton() {
   const router = useRouter();
   const { account, isConnecting, error, authenticateWithMetaMask, disconnect } = useMetaMaskAuth();
+  const { login, logout } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = async () => {
     try {
       const result = await authenticateWithMetaMask();
       if (result) {
+        // Update the auth context state
+        login(result.user, result.accessToken);
         setIsAuthenticated(true);
         console.log('Authentication successful:', result);
         // Show success message briefly before redirecting
         setTimeout(() => {
           router.push('/student');
-        }, 2000);
+        }, 1500);
       }
     } catch (err) {
       console.error('Authentication failed:', err);
@@ -27,6 +31,7 @@ export default function MetaMaskLoginButton() {
 
   const handleDisconnect = () => {
     disconnect();
+    logout(); // Use auth context logout
     setIsAuthenticated(false);
   };
 
@@ -52,7 +57,7 @@ export default function MetaMaskLoginButton() {
       <button
         onClick={handleLogin}
         disabled={isConnecting}
-        className="shadow-[inset_0_0_0_2px_#616467] text-black px-12 py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="shadow-[inset_0_0_0_2px_#616467] text-white px-12 py-3 rounded-full tracking-wide uppercase font-semibold bg-transparent hover:bg-[#616467] hover:text-white transition duration-300 text-sm"
       >
         {isConnecting ? 'Connecting...' : 'Connect Wallet'}
       </button>

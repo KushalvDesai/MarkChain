@@ -33,8 +33,7 @@ type UserDto {
   did: String!
   role: UserRole!
   name: String
-  email: String
-  subjects: [String!]
+  studentId: String
   isActive: Boolean!
   lastLogin: DateTime
   createdAt: DateTime!
@@ -48,7 +47,6 @@ scalar DateTime
 
 type Query {
   me: String!
-  getAllStudentsWithSubject(subject: String!): [UserDto!]!
   getUsersByRole(role: UserRole!): [UserDto!]!
   getUserProfile(walletAddress: String!): UserDto!
   getAllUsers: [UserDto!]!
@@ -57,7 +55,7 @@ type Query {
 type Mutation {
   generateNonce(walletAddress: String!): NonceResponse!
   verifySignature(input: VerifySignatureInput!): AuthResponse!
-  updateUserProfile(input: UpdateUserProfileDto!): UserDto!
+  updateUserProfile(walletAddress: String!, input: UpdateUserProfileDto!): UserDto!
 }
 
 input VerifySignatureInput {
@@ -68,6 +66,5 @@ input VerifySignatureInput {
 
 input UpdateUserProfileDto {
   name: String
-  email: String
-  subjects: [String!]
+  studentId: String
 }

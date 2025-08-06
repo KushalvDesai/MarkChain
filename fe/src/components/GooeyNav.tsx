@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface GooeyNavItem {
   label: string;
@@ -37,6 +38,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   const notificationRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   // Determine active index based on current pathname
   const getActiveIndexFromPath = () => {
@@ -85,8 +87,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
 
   const handleLogout = () => {
     setIsProfileOpen(false);
-    console.log('Logging out...');
-    router.push('/');
+    logout();
   };
 
   const handleNotificationClick = () => {
@@ -520,9 +521,16 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
                 className="flex items-center space-x-2 hover:bg-neutral-800 rounded-lg p-2 transition-colors"
               >
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium">KD</span>
+                  <span className="text-sm font-medium">
+                    {user?.name 
+                      ? user.name.charAt(0).toUpperCase()
+                      : 'U'
+                    }
+                  </span>
                 </div>
-                <span className="text-sm font-medium">Kushal Desai</span>
+                <span className="text-sm font-medium">
+                  {user?.name || 'Anonymous User'}
+                </span>
                 <svg className={`w-4 h-4 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
