@@ -25,10 +25,7 @@ export class UserDto {
   name?: string;
 
   @Field({ nullable: true })
-  email?: string;
-
-  @Field(() => [String], { nullable: true })
-  subjects?: string[];
+  studentId?: string;
 
   @Field()
   isActive: boolean;
@@ -49,8 +46,5 @@ export class UpdateUserProfileDto {
   name?: string;
 
   @Field({ nullable: true })
-  email?: string;
-
-  @Field(() => [String], { nullable: true })
-  subjects?: string[];
+  studentId?: string;
 }

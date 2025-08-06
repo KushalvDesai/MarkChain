@@ -26,14 +26,13 @@ export class UserSchema {
   @Field(() => UserRole)
   role: UserRole;
 
+  // Student Name (for all roles, but only editable for students)
   @Field({ nullable: true })
   name?: string;
 
+  // Student ID (required for students)
   @Field({ nullable: true })
-  email?: string;
-
-  @Field(() => [String], { nullable: true })
-  subjects?: string[];
+  studentId?: string;
 
   @Field()
   isActive: boolean;
