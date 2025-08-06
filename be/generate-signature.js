@@ -2,13 +2,13 @@ const { ethers } = require('ethers');
 
 async function generateTestSignature() {
   // Your MetaMask private key
-  const privateKey = '0x1e8ae238e448fa38fc489b369f9e8fa5f57215ad444cae784de204c9d74aab00';
+  const privateKey = '<YOUR_PRIVATE_KEY>';
   const wallet = new ethers.Wallet(privateKey);
   
   console.log('Your MetaMask Wallet Address:', wallet.address);
   
   // STEP 1: Replace this nonce with the actual nonce from your GraphQL response
-  const nonce = '74fd6ef01392baeaa8906fd913eea171f22392022602903509e58d1f1a8cf016';
+  const nonce = '8a239d66c849b97bf4f0db1d00fbdbbd010f8c060d6b14e7f8cc0ee010d5ca20';
   const walletAddress = wallet.address;
   
   const message = `Sign this message to authenticate with MarkChain.\n\nNonce: ${nonce}\nWallet: ${walletAddress}`;
