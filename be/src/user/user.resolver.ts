@@ -11,14 +11,14 @@ import { Roles } from '../auth/roles.decorator';
 export class UserResolver {
   constructor(private userService: UserService) {}
 
-  @Query(() => [UserDto])
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TEACHER, UserRole.ADMIN)
-  async getAllStudentsWithSubject(
-    @Args('subject') subject: string,
-  ): Promise<UserDto[]> {
-    return this.userService.getAllStudentsWithSubject(subject);
-  }
+  // @Query(() => [UserDto])
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  // async getAllStudentsWithSubject(
+  //   @Args('subject') subject: string,
+  // ): Promise<UserDto[]> {
+  //   return this.userService.getAllStudentsWithSubject(subject);
+  // }
 
   @Query(() => [UserDto])
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -48,10 +48,9 @@ export class UserResolver {
   @Mutation(() => UserDto)
   @UseGuards(JwtAuthGuard)
   async updateUserProfile(
+    @Args('walletAddress') walletAddress: string,
     @Args('input') input: UpdateUserProfileDto,
-    @Context() context: any,
   ): Promise<UserDto> {
-    const userWallet = context.req.user.walletAddress;
-    return this.userService.updateUserProfile(userWallet, input);
+    return this.userService.updateUserProfile(walletAddress, input);
   }
 }

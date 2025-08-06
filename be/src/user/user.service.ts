@@ -10,18 +10,17 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async getAllStudentsWithSubject(subject: string): Promise<any[]> {
-    // Find all students who have the specified subject
-    const students = await this.userModel.find({
-      role: UserRole.STUDENT,
-      subjects: subject,
-      isActive: true,
-    })
-    .select('-nonce')
-    .exec();
+  // async getAllStudentsWithSubject(subject: string): Promise<any[]> {
+  //   // Find all students - subject filtering removed since subjects field is removed
+  //   const students = await this.userModel.find({
+  //     role: UserRole.STUDENT,
+  //     isActive: true,
+  //   })
+  //   .select('-nonce')
+  //   .exec();
 
-    return students;
-  }
+  //   return students;
+  // }
 
   async getUsersByRole(role: UserRole): Promise<any[]> {
     const users = await this.userModel.find({
@@ -53,13 +52,23 @@ export class UserService {
     walletAddress: string,
     updateData: UpdateUserProfileDto
   ): Promise<any> {
+    // Only allow updating student name and studentId
+    const allowedFields = ['name', 'studentId'];
+    const updatePayload: any = {};
+    for (const key of allowedFields) {
+      if (updateData[key] !== undefined) {
+        updatePayload[key] = updateData[key];
+      }
+    }
+
+    // Update or create user profile
     const user = await this.userModel.findOneAndUpdate(
-      { 
+      {
         walletAddress: walletAddress.toLowerCase(),
-        isActive: true 
+        isActive: true
       },
-      { $set: updateData },
-      { new: true }
+      { $set: updatePayload },
+      { new: true, upsert: true }
     )
     .select('-nonce')
     .exec();
