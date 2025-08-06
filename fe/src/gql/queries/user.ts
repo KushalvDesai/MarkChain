@@ -16,12 +16,11 @@ export const GET_USER_PROFILE = gql`
     getUserProfile(walletAddress: $walletAddress) {
       walletAddress
       name
-      email
       role
-      subjects
       isActive
       did
       lastLogin
+      studentId
     }
   }
 `;
@@ -31,9 +30,7 @@ export const GET_USERS_BY_ROLE = gql`
     getUsersByRole(role: $role) {
       walletAddress
       name
-      email
       role
-      subjects
       isActive
       did
       lastLogin

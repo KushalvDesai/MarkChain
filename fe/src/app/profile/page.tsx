@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { useGetUserProfile } from "@/hooks/useGraphQL";
+import { useGetUserProfile, useUpdateUserProfile } from "@/hooks/useGraphQL";
 import Navbar from "@/components/Navbar";
 import MagicBento from "@/components/MagicBento";
 import ProfileInfo from "@/components/ProfileInfo";
@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,6 +35,9 @@ export default function ProfilePage() {
 
   // Fetch user profile using GraphQL
   const { data, loading, error, refetch } = useGetUserProfile(user?.walletAddress || "");
+  
+  // Update user profile mutation
+  const [updateUserProfile, { loading: updating }] = useUpdateUserProfile();
 
   // Update form data when profile data loads
   useEffect(() => {
@@ -71,9 +75,41 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    // TODO: Implement update mutation when available
-    console.log('Saving profile:', formData);
-    setIsEditing(false);
+    try {
+      setUpdateError(null); // Clear any previous errors
+      
+      // Call the update mutation
+      const result = await updateUserProfile({
+        variables: {
+          walletAddress: user?.walletAddress || "",
+          input: {
+            name: formData.name || undefined,
+            studentId: undefined // Add studentId if needed
+          }
+        }
+      });
+
+      if (result.data) {
+        console.log('Profile updated successfully:', result.data);
+        // Refetch the profile data to get the latest version
+        await refetch();
+        setIsEditing(false);
+      }
+    } catch (err: any) {
+      console.error('Error updating profile:', err);
+      
+      // Extract a meaningful error message
+      let errorMessage = 'Failed to update profile';
+      if (err.networkError?.result?.errors) {
+        errorMessage = err.networkError.result.errors[0]?.message || errorMessage;
+      } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
+        errorMessage = err.graphQLErrors[0].message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setUpdateError(errorMessage);
+    }
   };
 
   if (loading) {
@@ -156,6 +192,8 @@ export default function ProfilePage() {
                 profile={profile}
                 userAddress={user?.walletAddress || ""}
                 isEditing={isEditing}
+                isUpdating={updating}
+                updateError={updateError}
                 formData={formData}
                 onInputChange={handleInputChange}
                 onSubjectAdd={handleSubjectAdd}

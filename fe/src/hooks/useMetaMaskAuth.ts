@@ -98,10 +98,8 @@ export const useMetaMaskAuth = () => {
       const { accessToken, user } = verifyResult.data.verifySignature;
       console.log('Authentication successful:', { accessToken, user });
       
-      // Store token
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('user', JSON.stringify(user));
-
+      // Return the data instead of storing it directly
+      // The auth context will handle storage
       return { accessToken, user };
 
     } catch (err: any) {
@@ -126,8 +124,7 @@ export const useMetaMaskAuth = () => {
 
   const disconnect = () => {
     setAccount(null);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    // Remove localStorage handling since auth context will handle it
   };
 
   return {
