@@ -61,14 +61,14 @@ export class UserService {
       }
     }
 
-    // Update or create user profile
+    // Only update existing user profile
     const user = await this.userModel.findOneAndUpdate(
       {
         walletAddress: walletAddress.toLowerCase(),
         isActive: true
       },
       { $set: updatePayload },
-      { new: true, upsert: true }
+      { new: true }
     )
     .select('-nonce')
     .exec();

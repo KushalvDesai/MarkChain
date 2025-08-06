@@ -48,9 +48,10 @@ export class UserResolver {
   @Mutation(() => UserDto)
   @UseGuards(JwtAuthGuard)
   async updateUserProfile(
-    @Args('walletAddress') walletAddress: string,
     @Args('input') input: UpdateUserProfileDto,
+    @Context() context: any,
   ): Promise<UserDto> {
+    const walletAddress = context.req.user.walletAddress;
     return this.userService.updateUserProfile(walletAddress, input);
   }
 }
