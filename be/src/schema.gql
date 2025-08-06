@@ -10,7 +10,16 @@ type NonceResponse {
 type UserInfo {
   walletAddress: String!
   did: String!
-  role: String!
+  role: UserRole!
+  name: String
+  email: String
+}
+
+"""User roles in the system"""
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
 }
 
 type AuthResponse {
@@ -30,13 +39,6 @@ type UserDto {
   lastLogin: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-"""User roles in the system"""
-enum UserRole {
-  STUDENT
-  TEACHER
-  ADMIN
 }
 
 """

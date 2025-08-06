@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
-import { User, UserDocument } from '../schemas/user.schema';
+import { User, UserDocument, UserRole } from '../schemas/user.schema';
 import { randomBytes } from 'crypto';
 
 export interface NonceResponse {
@@ -22,7 +22,9 @@ export interface AuthResponse {
   user: {
     walletAddress: string;
     did: string;
-    role: string;
+    role: UserRole;
+    name?: string;
+    email?: string;
   };
 }
 
@@ -41,12 +43,18 @@ export class AuthService {
     const nonce = randomBytes(32).toString('hex');
     const message = `Sign this message to authenticate with MarkChain.\n\nNonce: ${nonce}\nWallet: ${walletAddress}`;
 
+    // Create DID for the wallet
+    const did = `did:ethr:${walletAddress.toLowerCase()}`;
+
     // Store nonce in user document (create user if doesn't exist)
     await this.userModel.findOneAndUpdate(
       { walletAddress: walletAddress.toLowerCase() },
       { 
         nonce,
-        walletAddress: walletAddress.toLowerCase()
+        walletAddress: walletAddress.toLowerCase(),
+        did: did,
+        role: UserRole.STUDENT, // Default role
+        isActive: true
       },
       { upsert: true, new: true }
     );
@@ -81,12 +89,18 @@ export class AuthService {
         throw new UnauthorizedException('Invalid signature');
       }
     } catch (error) {
+      console.error('Signature verification error:', error);
       throw new UnauthorizedException('Invalid signature');
     }
 
-    // Create DID if user doesn't have one
+    // Ensure DID is set (should already be set from generateNonce)
     if (!user.did) {
       user.did = `did:ethr:${walletAddress.toLowerCase()}`;
+    }
+
+    // Ensure role is set
+    if (!user.role) {
+      user.role = UserRole.STUDENT;
     }
 
     // Update last login and clear nonce
@@ -110,6 +124,8 @@ export class AuthService {
         walletAddress: user.walletAddress,
         did: user.did,
         role: user.role,
+        name: user.name,
+        email: user.email,
       },
     };
   }
