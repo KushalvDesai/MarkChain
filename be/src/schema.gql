@@ -45,17 +45,175 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type CredentialDto {
+  _id: ID!
+  studentDID: String!
+  teacherDID: String!
+  subject: String!
+  marks: Float!
+  vcHash: String!
+  vcJson: String!
+  isRevoked: Boolean!
+  revokedAt: DateTime
+  revokedBy: String
+  blockchainTxHash: String
+  academicYear: String
+  semester: String
+  examType: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CredentialResponse {
+  success: Boolean!
+  message: String!
+  credential: CredentialDto
+}
+
+type CredentialsListResponse {
+  success: Boolean!
+  message: String!
+  credentials: [CredentialDto!]!
+  total: Float!
+}
+
+type SubjectDto {
+  _id: ID!
+  code: String!
+  name: String!
+  description: String
+  credits: Float!
+  department: String
+  academicYear: String
+  semester: String
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type EnrollmentDto {
+  _id: ID!
+  studentDID: String!
+  subjectCode: String!
+  teacherDID: String!
+  academicYear: String
+  semester: String
+  status: String!
+  enrolledAt: DateTime!
+  completedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SubjectResponse {
+  success: Boolean!
+  message: String!
+  subject: SubjectDto
+}
+
+type EnrollmentResponse {
+  success: Boolean!
+  message: String!
+  enrollment: EnrollmentDto
+}
+
+type SubjectsListResponse {
+  success: Boolean!
+  message: String!
+  subjects: [SubjectDto!]!
+  total: Float!
+}
+
+type EnrollmentsListResponse {
+  success: Boolean!
+  message: String!
+  enrollments: [EnrollmentDto!]!
+  total: Float!
+}
+
+type HealthCheckResponse {
+  status: String!
+  timestamp: String!
+  uptime: Float!
+  version: String!
+  environment: String!
+}
+
+type SystemInfoResponse {
+  success: Boolean!
+  message: String!
+  nodeVersion: String!
+  platform: String!
+  architecture: String!
+  totalMemory: String!
+  freeMemory: String!
+  uptime: Float!
+}
+
+type HashResponse {
+  success: Boolean!
+  message: String!
+  hash: String!
+  algorithm: String!
+  originalData: String!
+}
+
+type ValidateDIDResponse {
+  success: Boolean!
+  message: String!
+  isValid: Boolean!
+  did: String!
+  method: String
+  network: String
+}
+
 type Query {
   me: String!
   getUsersByRole(role: UserRole!): [UserDto!]!
   getUserProfile(walletAddress: String!): UserDto!
   getAllUsers: [UserDto!]!
+  getCredential(credentialId: String!): CredentialResponse!
+  getCredentials(filterDto: GetCredentialsFilterDto): CredentialsListResponse!
+  getStudentCredentials(studentDID: String!): CredentialsListResponse!
+  getTeacherCredentials(teacherDID: String!): CredentialsListResponse!
+  getAllSubjects: SubjectsListResponse!
+  getSubject(subjectId: String!): SubjectResponse!
+  getStudentEnrollments(studentDID: String!): EnrollmentsListResponse!
+  getTeacherSubjects(teacherDID: String!): EnrollmentsListResponse!
+  getSubjectStudents(subjectCode: String!): EnrollmentsListResponse!
+  healthCheck: HealthCheckResponse!
+  getSystemInfo: SystemInfoResponse!
+  validateDID(validateDIDDto: ValidateDIDDto!): ValidateDIDResponse!
+  generateNonce: String!
+  validateTimestamp(timestamp: Float!, maxAgeMs: Float! = 300000): Boolean!
+}
+
+input GetCredentialsFilterDto {
+  studentDID: String
+  teacherDID: String
+  subject: String
+  academicYear: String
+  semester: String
+  isRevoked: Boolean
+}
+
+input ValidateDIDDto {
+  did: String!
 }
 
 type Mutation {
   generateNonce(walletAddress: String!): NonceResponse!
   verifySignature(input: VerifySignatureInput!): AuthResponse!
-  updateUserProfile(walletAddress: String!, input: UpdateUserProfileDto!): UserDto!
+  updateUserProfile(input: UpdateUserProfileDto!): UserDto!
+  storeCredential(createCredentialDto: CreateCredentialDto!): CredentialResponse!
+  updateCredential(credentialId: String!, updateCredentialDto: UpdateCredentialDto!): CredentialResponse!
+  revokeCredential(credentialId: String!, revokeCredentialDto: RevokeCredentialDto!): CredentialResponse!
+  createSubject(createSubjectDto: CreateSubjectDto!): SubjectResponse!
+  assignTeacher(assignTeacherDto: AssignTeacherDto!): EnrollmentResponse!
+  enrollStudent(enrollStudentDto: EnrollStudentDto!): EnrollmentResponse!
+  updateSubject(subjectId: String!, updateSubjectDto: UpdateSubjectDto!): SubjectResponse!
+  hashData(hashDataDto: HashDataDto!): HashResponse!
+  sanitizeString(input: String!): String!
 }
 
 input VerifySignatureInput {
@@ -67,4 +225,69 @@ input VerifySignatureInput {
 input UpdateUserProfileDto {
   name: String
   studentId: String
+}
+
+input CreateCredentialDto {
+  studentDID: String!
+  teacherDID: String!
+  subject: String!
+  marks: Float!
+  vcHash: String!
+  vcJson: String!
+  academicYear: String
+  semester: String
+  examType: String
+}
+
+input UpdateCredentialDto {
+  marks: Float
+  vcHash: String
+  vcJson: String
+  academicYear: String
+  semester: String
+  examType: String
+}
+
+input RevokeCredentialDto {
+  revokedBy: String!
+}
+
+input CreateSubjectDto {
+  code: String!
+  name: String!
+  description: String
+  credits: Float!
+  department: String
+  academicYear: String
+  semester: String
+}
+
+input AssignTeacherDto {
+  teacherDID: String!
+  subjectCode: String!
+  academicYear: String
+  semester: String
+}
+
+input EnrollStudentDto {
+  studentDID: String!
+  subjectCode: String!
+  teacherDID: String!
+  academicYear: String
+  semester: String
+}
+
+input UpdateSubjectDto {
+  name: String
+  description: String
+  credits: Float
+  department: String
+  academicYear: String
+  semester: String
+  isActive: Boolean
+}
+
+input HashDataDto {
+  data: String!
+  algorithm: String! = "sha256"
 }
