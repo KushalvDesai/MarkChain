@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, memo } from "react";
 import Hyperspeed from "@/components/Hyperspeed";
+import MetaMaskLoginButton from "@/components/MetaMaskLoginButton";
 import Link from "next/link";
 
 // Memoize Hyperspeed to prevent re-renders
@@ -70,12 +71,36 @@ export default function HomePage() {
     }
   }, []);
 
+  const scrollToLogin = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="relative bg-black h-screen overflow-hidden">
       {/* Hyperspeed Background - Fixed and unaffected by scroll */}
       <div className="fixed inset-0 z-0">
         <MemoizedHyperspeed />
       </div>
+
+      {/* Floating Skip to Login Button */}
+      {scrollProgress > 0.1 && scrollProgress < 0.75 && (
+        <div className="fixed bottom-6 right-6 z-20">
+          <button
+            onClick={scrollToLogin}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
+          >
+            <span className="text-sm font-medium">Skip to Login</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Scrollable Content Container */}
       <div 
@@ -102,6 +127,16 @@ export default function HomePage() {
             <p className="text-2xl md:text-3xl text-gray-300 font-light mb-16">
               Academic Identity. <span className="text-blue-400">Decentralized.</span>
             </p>
+            
+            {/* Quick Access Button */}
+            <div className="mb-8">
+              <button
+                onClick={scrollToLogin}
+                className="shadow-[inset_0_0_0_2px_#616467] text-white px-8 py-3 rounded-full tracking-wide uppercase font-semibold bg-transparent hover:bg-[#616467] hover:text-white transition duration-300 text-sm"
+              >
+                Get Started Now
+              </button>
+            </div>
             
             {/* Scroll Indicator */}
             <div className="flex flex-col items-center space-y-2 animate-bounce">
@@ -252,12 +287,25 @@ export default function HomePage() {
               transform: `scale(${scrollProgress > 0.78 ? 1 : 0.8})`
             }}
           >
-            <Link 
-              href="/student" 
-              className="inline-block bg-white text-black px-12 py-6 text-2xl font-semibold rounded-2xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-            >
-              Get Started
-            </Link>
+            <div className="mb-8">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Ready to own your credentials?
+              </h2>
+              <p className="text-xl text-gray-300 mb-8">
+                Connect your MetaMask wallet to get started
+              </p>
+            </div>
+            
+            <MetaMaskLoginButton />
+            
+            <div className="mt-8">
+              <Link 
+                href="/student" 
+                className="text-gray-400 hover:text-white transition-colors duration-300 text-sm underline"
+              >
+                Or browse as guest
+              </Link>
+            </div>
           </div>
         </section>
       </div>
