@@ -8,7 +8,6 @@ export default function Navbar() {
     { label: "Dashboard", href: "/student" },
     { label: "Profile", href: "/profile" },
     { label: "Credentials", href: "/student/credentials" },
-    { label: "Analytics", href: "/student/analytics" },
   ];
 
   return (

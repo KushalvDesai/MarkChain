@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useGetUserProfile } from "@/hooks/useGraphQL";
 
 interface GooeyNavItem {
   label: string;
@@ -39,6 +40,19 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
+
+  // Fetch user profile data using GraphQL
+  const { data: userProfileData, loading: profileLoading, refetch: refetchProfile } = useGetUserProfile(user?.walletAddress || "");
+  
+  // Get user display data from profile or fallback to auth user
+  const displayUser = userProfileData?.getUserProfile || user;
+
+  // Refetch profile when user changes
+  useEffect(() => {
+    if (user?.walletAddress && refetchProfile) {
+      refetchProfile();
+    }
+  }, [user?.walletAddress, refetchProfile]);
 
   // Determine active index based on current pathname
   const getActiveIndexFromPath = () => {
@@ -190,9 +204,19 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
       particles.forEach((p) => filterRef.current!.removeChild(p));
     }
     if (textRef.current) {
+      // Show text effect temporarily during animation
+      textRef.current.style.opacity = "1";
       textRef.current.classList.remove("active");
       void textRef.current.offsetWidth;
       textRef.current.classList.add("active");
+      
+      // Hide text effect after animation completes
+      setTimeout(() => {
+        if (textRef.current) {
+          textRef.current.style.opacity = "0";
+          textRef.current.classList.remove("active");
+        }
+      }, animationTime + 200); // Hide slightly after animation completes
     }
     if (filterRef.current) {
       makeParticles(filterRef.current);
@@ -233,14 +257,16 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
       ] as HTMLElement;
       if (activeLi) {
         updateEffectPosition(activeLi);
-        textRef.current?.classList.add("active");
+        // Don't show text effect persistently, only during animation
+        textRef.current?.classList.remove("active");
       }
-      // Show the effect elements
+      // Show only the filter effect for the gooey background
       if (filterRef.current) {
         filterRef.current.style.opacity = "1";
       }
+      // Hide text effect by default
       if (textRef.current) {
-        textRef.current.style.opacity = "1";
+        textRef.current.style.opacity = "0";
       }
     } else {
       // Hide and remove active effects when no item should be selected
@@ -522,14 +548,27 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
               >
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-sm font-medium">
-                    {user?.name 
-                      ? user.name.charAt(0).toUpperCase()
-                      : 'U'
-                    }
+                    {profileLoading ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : displayUser?.name ? (
+                      displayUser.name.charAt(0).toUpperCase()
+                    ) : displayUser?.walletAddress ? (
+                      displayUser.walletAddress.slice(2, 4).toUpperCase()
+                    ) : (
+                      'U'
+                    )}
                   </span>
                 </div>
                 <span className="text-sm font-medium">
-                  {user?.name || 'Anonymous User'}
+                  {profileLoading ? (
+                    'Loading...'
+                  ) : displayUser?.name ? (
+                    displayUser.name
+                  ) : displayUser?.walletAddress ? (
+                    `${displayUser.walletAddress.slice(0, 6)}...${displayUser.walletAddress.slice(-4)}`
+                  ) : (
+                    'Anonymous User'
+                  )}
                 </span>
                 <svg className={`w-4 h-4 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -566,8 +605,8 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
         </div>
 
         {/* Gooey Effect Elements - positioned relative to the entire container */}
-        <span className="effect filter" ref={filterRef} />
-        <span className="effect text" ref={textRef} />
+        <span className="effect filter" ref={filterRef} style={{ opacity: 0 }} />
+        <span className="effect text" ref={textRef} style={{ opacity: 0 }} />
       </div>
     </>
   );
