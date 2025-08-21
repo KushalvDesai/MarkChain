@@ -206,8 +206,6 @@ We welcome contributions! Please follow these steps:
 ![GitHub forks](https://img.shields.io/github/forks/KushalvDesai/MarkChain?style=flat-square&color=cyan)
 ![GitHub stars](https://img.shields.io/github/stars/KushalvDesai/MarkChain?style=flat-square&color=gold)
 
-### **Language Distribution in MarkChain**
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=KushalvDesai&repo=MarkChain&layout=compact&theme=tokyonight&hide_border=true" alt="MarkChain Languages" />
 
 </div>
 
