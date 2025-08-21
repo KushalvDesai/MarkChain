@@ -61,6 +61,17 @@ export class UserService {
       }
     }
 
+    // Prevent duplicate studentId
+    if (updatePayload.studentId) {
+      const existing = await this.userModel.findOne({
+        studentId: updatePayload.studentId,
+        walletAddress: { $ne: walletAddress.toLowerCase() }
+      });
+      if (existing) {
+        throw new Error('Student ID already exists for another user');
+      }
+    }
+
     // Only update existing user profile
     const user = await this.userModel.findOneAndUpdate(
       {

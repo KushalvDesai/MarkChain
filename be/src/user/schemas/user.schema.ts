@@ -45,4 +45,5 @@ export class UserSchema {
 
   @Field()
   updatedAt: Date;
+  
 }
