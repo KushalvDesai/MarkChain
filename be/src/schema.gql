@@ -38,6 +38,9 @@ type UserDto {
   lastLogin: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
+  otp: String
+  otpExpiry: DateTime
+  isVerified: Boolean
 }
 
 """
@@ -45,17 +48,78 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type OTPResponseDto {
+  success: Boolean!
+  message: String!
+  email: String
+}
+
+type VerifyOTPResponseDto {
+  success: Boolean!
+  message: String!
+  user: UserDto
+}
+
+type HealthCheckResponse {
+  status: String!
+  timestamp: String!
+  uptime: Float!
+  version: String!
+  environment: String!
+}
+
+type SystemInfoResponse {
+  success: Boolean!
+  message: String!
+  nodeVersion: String!
+  platform: String!
+  architecture: String!
+  totalMemory: String!
+  freeMemory: String!
+  uptime: Float!
+}
+
+type HashResponse {
+  success: Boolean!
+  message: String!
+  hash: String!
+  algorithm: String!
+  originalData: String!
+}
+
+type ValidateDIDResponse {
+  success: Boolean!
+  message: String!
+  isValid: Boolean!
+  did: String!
+  method: String
+  network: String
+}
+
 type Query {
   me: String!
   getUsersByRole(role: UserRole!): [UserDto!]!
   getUserProfile(walletAddress: String!): UserDto!
   getAllUsers: [UserDto!]!
+  healthCheck: HealthCheckResponse!
+  getSystemInfo: SystemInfoResponse!
+  validateDID(validateDIDDto: ValidateDIDDto!): ValidateDIDResponse!
+  generateNonce: String!
+  validateTimestamp(timestamp: Float!, maxAgeMs: Float! = 300000): Boolean!
+}
+
+input ValidateDIDDto {
+  did: String!
 }
 
 type Mutation {
   generateNonce(walletAddress: String!): NonceResponse!
   verifySignature(input: VerifySignatureInput!): AuthResponse!
   updateUserProfile(input: UpdateUserProfileDto!): UserDto!
+  sendOTPForVerification(input: SendOTPDto!): OTPResponseDto!
+  verifyOTPAndUpdateProfile(input: VerifyOTPDto!): VerifyOTPResponseDto!
+  hashData(hashDataDto: HashDataDto!): HashResponse!
+  sanitizeString(input: String!): String!
 }
 
 input VerifySignatureInput {
@@ -67,4 +131,19 @@ input VerifySignatureInput {
 input UpdateUserProfileDto {
   name: String
   studentId: String
+}
+
+input SendOTPDto {
+  studentId: String!
+}
+
+input VerifyOTPDto {
+  otp: String!
+  name: String!
+  studentId: String!
+}
+
+input HashDataDto {
+  data: String!
+  algorithm: String! = "sha256"
 }
