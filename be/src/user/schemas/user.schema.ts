@@ -45,5 +45,14 @@ export class UserSchema {
 
   @Field()
   updatedAt: Date;
-  
+
+  // OTP verification fields
+  @Field({ nullable: true })
+  otp?: string;
+
+  @Field({ nullable: true })
+  otpExpiry?: Date;
+
+  @Field({ nullable: true })
+  isVerified?: boolean;
 }

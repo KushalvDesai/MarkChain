@@ -46,18 +46,25 @@ export class AuthService {
     // Create DID for the wallet
     const did = `did:ethr:${walletAddress.toLowerCase()}`;
 
-    // Store nonce in user document (create user if doesn't exist)
-    await this.userModel.findOneAndUpdate(
-      { walletAddress: walletAddress.toLowerCase() },
-      { 
-        nonce,
+    // Check if user exists
+    const existingUser = await this.userModel.findOne({ walletAddress: walletAddress.toLowerCase() });
+    if (existingUser) {
+      // Only update nonce, keep existing role and other fields
+      await this.userModel.findOneAndUpdate(
+        { walletAddress: walletAddress.toLowerCase() },
+        { nonce },
+        { new: true }
+      );
+    } else {
+      // Create new user with default role STUDENT
+      await this.userModel.create({
         walletAddress: walletAddress.toLowerCase(),
         did: did,
-        role: UserRole.STUDENT, // Default role
-        isActive: true
-      },
-      { upsert: true, new: true }
-    );
+        role: UserRole.STUDENT,
+        isActive: true,
+        nonce,
+      });
+    }
 
     return { nonce, message };
   }
@@ -124,8 +131,7 @@ export class AuthService {
         walletAddress: user.walletAddress,
         did: user.did,
         role: user.role,
-        name: user.name,
-        //email: user.email,
+        name: user.name
       },
     };
   }

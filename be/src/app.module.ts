@@ -7,6 +7,10 @@ import { join } from 'path';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { CredentialStorageModule } from './credential-storage/credential-storage.module';
+import { AcademicManagementModule } from './academic-management/academic-management.module';
+import { UtilityModule } from './utility/utility.module';
+import { EmailModule } from './email/email.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -44,6 +48,10 @@ import { getDatabaseConfig } from './config/database.config';
     // Feature Modules
     AuthModule,
     UserModule,
+    CredentialStorageModule,
+    AcademicManagementModule,
+    UtilityModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [AppService],
