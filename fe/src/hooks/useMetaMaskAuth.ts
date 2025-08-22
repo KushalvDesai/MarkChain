@@ -96,7 +96,9 @@ export const useMetaMaskAuth = () => {
       }
 
       const { accessToken, user } = verifyResult.data.verifySignature;
-      console.log('Authentication successful:', { accessToken, user });
+      console.log('Authentication successful - Raw response:', { accessToken, user });
+      console.log('User role from backend:', user.role);
+      console.log('User role type:', typeof user.role);
       
       // Return the data instead of storing it directly
       // The auth context will handle storage

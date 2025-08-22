@@ -3,6 +3,8 @@ import {
   GENERATE_NONCE, 
   VERIFY_SIGNATURE,
   UPDATE_USER_PROFILE,
+  SEND_OTP_FOR_VERIFICATION,
+  VERIFY_OTP_AND_UPDATE_PROFILE,
   GET_ALL_USERS,
   GET_USER_PROFILE,
   GET_USERS_BY_ROLE,
@@ -11,7 +13,11 @@ import {
   GetAllUsersResponse,
   GetUserProfileResponse,
   GetUsersByRoleResponse,
+  SendOTPResponse,
+  VerifyOTPResponse,
   VerifySignatureInput,
+  SendOTPInput,
+  VerifyOTPInput,
   UserRole
 } from '../gql';
 
@@ -27,6 +33,14 @@ export const useVerifySignature = () => {
 // User Mutation Hooks
 export const useUpdateUserProfile = () => {
   return useMutation(UPDATE_USER_PROFILE);
+};
+
+export const useSendOTPForVerification = () => {
+  return useMutation<SendOTPResponse, { input: SendOTPInput }>(SEND_OTP_FOR_VERIFICATION);
+};
+
+export const useVerifyOTPAndUpdateProfile = () => {
+  return useMutation<VerifyOTPResponse, { input: VerifyOTPInput }>(VERIFY_OTP_AND_UPDATE_PROFILE);
 };
 
 // User Query Hooks

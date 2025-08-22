@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserRole } from '@/gql/types';
 
 interface User {
   walletAddress: string;
   name?: string;
   email?: string;
-  role?: string;
+  role?: UserRole;
+  did?: string;
 }
 
 interface AuthContextType {
@@ -36,6 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (token && userData) {
           const parsedUser = JSON.parse(userData);
+          console.log('Auth checkAuth - Retrieved user from localStorage:', parsedUser);
+          console.log('Auth checkAuth - User role:', parsedUser.role);
           setUser(parsedUser);
         }
       } catch (error) {
@@ -52,6 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (userData: User, token: string) => {
+    console.log('Auth login - User data received:', userData);
+    console.log('Auth login - User role:', userData.role);
     localStorage.setItem('accessToken', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);

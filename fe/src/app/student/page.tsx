@@ -1,12 +1,13 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/components/Navbar";
+import DynamicNavbar from "@/components/DynamicNavbar";
 import StudentMarks from "@/components/StudentMarks";
 import Analytics from "@/components/Analytics";
 import LatestCredential from "@/components/LatestCredential";
 import MagicBento from "@/components/MagicBento";
 import ProtectedRoute from "@/components/ProtectedRoute";
+// import UserDebugInfo from "@/components/UserDebugInfo";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -14,8 +15,8 @@ export default function StudentDashboard() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-950">
-        {/* Rectangle 3 - Navbar */}
-        <Navbar />
+        {/* Dynamic Navbar based on user role */}
+        <DynamicNavbar />
         
         {/* Welcome Message */}
         <div className="p-6 pb-2">
@@ -75,6 +76,9 @@ export default function StudentDashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Debug component - remove in production */}
+      {/* <UserDebugInfo /> */}
     </ProtectedRoute>
   );
 }
