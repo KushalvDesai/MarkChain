@@ -38,6 +38,16 @@ export class UserDto {
 
   @Field()
   updatedAt: Date;
+
+  // OTP verification fields
+  @Field({ nullable: true })
+  otp?: string;
+
+  @Field({ nullable: true })
+  otpExpiry?: Date;
+
+  @Field({ nullable: true })
+  isVerified?: boolean;
 }
 
 @InputType()
@@ -47,4 +57,46 @@ export class UpdateUserProfileDto {
 
   @Field({ nullable: true })
   studentId?: string;
+}
+
+@InputType()
+export class SendOTPDto {
+  @Field()
+  studentId: string;
+}
+
+@InputType()
+export class VerifyOTPDto {
+  @Field()
+  otp: string;
+
+  @Field()
+  name: string;
+
+  @Field()
+  studentId: string;
+}
+
+@ObjectType()
+export class OTPResponseDto {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+
+  @Field({ nullable: true })
+  email?: string;
+}
+
+@ObjectType()
+export class VerifyOTPResponseDto {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+
+  @Field(() => UserDto, { nullable: true })
+  user?: UserDto;
 }

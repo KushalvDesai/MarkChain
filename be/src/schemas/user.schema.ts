@@ -34,6 +34,16 @@ export class User {
 
   @Prop()
   lastLogin?: Date;
+
+  // OTP verification fields
+  @Prop()
+  otp?: string;
+
+  @Prop()
+  otpExpiry?: Date;
+
+  @Prop({ default: false })
+  isVerified?: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
