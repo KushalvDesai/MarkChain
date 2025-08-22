@@ -25,12 +25,11 @@ export const SEND_OTP_FOR_VERIFICATION = gql`
 `;
 
 export const VERIFY_OTP_AND_UPDATE_PROFILE = gql`
-  mutation VerifyOTPAndUpdateProfile($input: VerifyOTPInput!) {
+  mutation VerifyOTPAndUpdateProfile($input: VerifyOTPDto!) {
     verifyOTPAndUpdateProfile(input: $input) {
       success
       message
       user {
-        id
         name
         studentId
         isVerified

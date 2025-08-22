@@ -58,18 +58,20 @@ export default function ProfileInfo({
       setOtpError(null);
       setOtpSuccess(null);
       
+      // Capitalize the student ID before sending
+      const capitalizedStudentId = tempStudentId.trim().toUpperCase();
+      
       const result = await sendOTPForVerification({
         variables: {
           input: {
-            studentId: tempStudentId.trim()
+            studentId: capitalizedStudentId
           }
         }
       });
 
       if (result.data?.sendOTPForVerification.success) {
         // For students, we know the email format is studentId@charusat.edu.in
-        const emailAddress = `${tempStudentId.trim()}@charusat.edu.in`;
-        setOtpSuccess(`OTP sent to ${emailAddress}`);
+        setOtpSuccess(`OTP sent to ${capitalizedStudentId.toLowerCase()}@charusat.edu.in`);
         setOtpModalOpen(true);
       }
     } catch (error: any) {
@@ -87,12 +89,15 @@ export default function ProfileInfo({
     try {
       setOtpError(null);
       
+      // Use the capitalized student ID for verification
+      const capitalizedStudentId = tempStudentId.trim().toUpperCase();
+      
       const result = await verifyOTPAndUpdateProfile({
         variables: {
           input: {
             otp: otp.trim(),
             name: formData.name || profile?.name || "",
-            studentId: tempStudentId.trim()
+            studentId: capitalizedStudentId
           }
         }
       });
@@ -374,7 +379,7 @@ export default function ProfileInfo({
                 Verify Student ID
               </h3>
               <p className="text-gray-300 text-sm">
-                Enter the OTP sent to {tempStudentId}@charusat.edu.in
+                Enter the OTP sent to {tempStudentId.trim().toUpperCase().toLowerCase()}@charusat.edu.in
               </p>
             </div>
 
