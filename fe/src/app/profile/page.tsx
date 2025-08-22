@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useGetUserProfile, useUpdateUserProfile } from "@/hooks/useGraphQL";
-import Navbar from "@/components/Navbar";
+import { UserRole } from "@/gql/types";
+import DynamicNavbar from "@/components/DynamicNavbar";
 import MagicBento from "@/components/MagicBento";
 import ProfileInfo from "@/components/ProfileInfo";
 import BlockchainInfo from "@/components/BlockchainInfo";
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    studentId: "",
     subjects: [] as string[]
   });
 
@@ -46,6 +48,7 @@ export default function ProfilePage() {
       setFormData({
         name: profile.name || "",
         email: profile.email || "",
+        studentId: profile.studentId || "",
         subjects: profile.subjects || []
       });
     }
@@ -78,14 +81,22 @@ export default function ProfilePage() {
     try {
       setUpdateError(null); // Clear any previous errors
       
-      // Call the update mutation
+      // For student ID updates, we use OTP verification
+      // Only update basic profile information here (name, email)
+      const updateInput: any = {
+        name: formData.name || undefined
+      };
+
+      // For students, email is auto-generated from studentId, so don't include it in updates
+      // For admins/teachers, include email if provided
+      if (user?.role !== UserRole.STUDENT) {
+        updateInput.email = formData.email || undefined;
+      }
+
       const result = await updateUserProfile({
         variables: {
           walletAddress: user?.walletAddress || "",
-          input: {
-            name: formData.name || undefined,
-            studentId: undefined // Add studentId if needed
-          }
+          input: updateInput
         }
       });
 
@@ -115,7 +126,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950">
-        <Navbar />
+        <DynamicNavbar />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
@@ -129,7 +140,7 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-950">
-        <Navbar />
+        <DynamicNavbar />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="text-center">
             <div className="text-red-400 mb-4">
@@ -156,8 +167,8 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-950">
-        {/* Navbar */}
-        <Navbar />
+        {/* Dynamic Navbar */}
+        <DynamicNavbar />
         
         {/* Welcome Message */}
         <div className="p-6 pb-2">
@@ -191,6 +202,7 @@ export default function ProfilePage() {
               children: <ProfileInfo 
                 profile={profile}
                 userAddress={user?.walletAddress || ""}
+                userRole={user?.role}
                 isEditing={isEditing}
                 isUpdating={updating}
                 updateError={updateError}
