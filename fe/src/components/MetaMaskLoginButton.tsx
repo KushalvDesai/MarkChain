@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMetaMaskAuth } from "@/hooks/useMetaMaskAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { UserRole } from "@/gql/types";
 
 export default function MetaMaskLoginButton() {
   const router = useRouter();
@@ -19,9 +20,24 @@ export default function MetaMaskLoginButton() {
         login(result.user, result.accessToken);
         setIsAuthenticated(true);
         console.log('Authentication successful:', result);
+        console.log('User role:', result.user.role);
+        console.log('Role comparison - ADMIN:', result.user.role === UserRole.ADMIN);
+        console.log('Role comparison - STUDENT:', result.user.role === UserRole.STUDENT);
+        
         // Show success message briefly before redirecting
         setTimeout(() => {
-          router.push('/student');
+          // Role-based redirect
+          if (result.user.role === UserRole.ADMIN) {
+            console.log('Redirecting to admin dashboard');
+            router.push('/admin');
+          } else if (result.user.role === UserRole.STUDENT) {
+            console.log('Redirecting to student dashboard');
+            router.push('/student');
+          } else {
+            // Default to student dashboard for any other role
+            console.log('Unknown role, redirecting to student dashboard');
+            router.push('/student');
+          }
         }, 1500);
       }
     } catch (err) {

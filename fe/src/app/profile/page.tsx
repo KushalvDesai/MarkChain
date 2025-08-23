@@ -9,7 +9,6 @@ import DynamicNavbar from "@/components/DynamicNavbar";
 import MagicBento from "@/components/MagicBento";
 import ProfileInfo from "@/components/ProfileInfo";
 import BlockchainInfo from "@/components/BlockchainInfo";
-import ProfileStats from "@/components/ProfileStats";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface UserProfile {
