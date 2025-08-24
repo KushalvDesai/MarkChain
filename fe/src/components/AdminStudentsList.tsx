@@ -1,13 +1,63 @@
 "use client";
 
-import { useGetAllUsers } from "@/hooks/useGraphQL";
+import { useGetAllUsers, useGetUsersByRole } from "@/hooks/useGraphQL";
 import { UserRole } from "@/gql/types";
 
 export default function AdminStudentsList() {
-  const { data, loading, error, refetch } = useGetAllUsers();
+  // Use both queries to get comprehensive student data
+  const { data: allUsersData, loading: allUsersLoading, error: allUsersError, refetch: refetchAllUsers } = useGetAllUsers();
+  const { data: studentRoleData, loading: studentRoleLoading, error: studentRoleError, refetch: refetchStudentRole } = useGetUsersByRole(UserRole.STUDENT);
 
-  // Filter only students from all users
-  const students = data?.getAllUsers?.filter(user => user.role === UserRole.STUDENT) || [];
+  // Combine loading states - remove profilesLoading since we're not doing individual fetches
+  const loading = allUsersLoading || studentRoleLoading;
+  
+  // Combine error states
+  const error = allUsersError || studentRoleError;
+
+  // Get students from both queries and merge the data
+  const allStudents = allUsersData?.getAllUsers?.filter(user => user.role === UserRole.STUDENT) || [];
+  const roleStudents = studentRoleData?.getUsersByRole || [];
+  
+  // Merge and deduplicate students by wallet address, prioritizing more complete data
+  const studentMap = new Map();
+  
+  // Add students from all users query first
+  allStudents.forEach(student => {
+    studentMap.set(student.walletAddress, student);
+  });
+  
+  // Add/merge students from role-based query (may have more complete data)
+  roleStudents.forEach(student => {
+    const existing = studentMap.get(student.walletAddress);
+    if (existing) {
+      // Merge data, prioritizing non-null/non-undefined values
+      const merged = {
+        ...existing,
+        ...Object.fromEntries(
+          Object.entries(student).filter(([_, value]) => value !== null && value !== undefined && value !== '')
+        )
+      };
+      studentMap.set(student.walletAddress, merged);
+    } else {
+      studentMap.set(student.walletAddress, student);
+    }
+  });
+  
+  // Convert back to array
+  const students = Array.from(studentMap.values());
+
+  // Combined refetch function
+  const refetch = () => {
+    refetchAllUsers();
+    refetchStudentRole();
+  };
+
+  // Debug logging
+  console.log('AdminStudentsList - All Users Data:', allUsersData);
+  console.log('AdminStudentsList - Student Role Data:', studentRoleData);
+  console.log('AdminStudentsList - All Students from getAllUsers:', allStudents);
+  console.log('AdminStudentsList - Role Students from getUsersByRole:', roleStudents);
+  console.log('AdminStudentsList - Final merged students:', students);
 
   if (loading) {
     return (
@@ -74,7 +124,7 @@ export default function AdminStudentsList() {
             <p className="text-gray-400">No students are currently registered in the system.</p>
           </div>
         ) : (
-          students.map((student, index) => (
+          students.map((student: any, index: number) => (
             <div
               key={student._id || index}
               className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300"
@@ -94,8 +144,13 @@ export default function AdminStudentsList() {
                       {student.name || 'Anonymous Student'}
                     </h3>
                     <p className="text-sm text-gray-400">
-                      {student.studentId || 'No Student ID'}
+                      {student.studentId ? `ID: ${student.studentId}` : 'No Student ID'}
                     </p>
+                    {student.email && (
+                      <p className="text-xs text-gray-500">
+                        {student.email}
+                      </p>
+                    )}
                     <p className="text-xs text-gray-500 font-mono">
                       {`${student.walletAddress.slice(0, 6)}...${student.walletAddress.slice(-4)}`}
                     </p>
@@ -103,13 +158,27 @@ export default function AdminStudentsList() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
+                    {/* Verification Status */}
+                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-1 ${
+                      student.studentId 
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                    }`}>
+                      <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                        student.studentId ? 'bg-green-500' : 'bg-yellow-500'
+                      }`}></div>
+                      {student.studentId ? 'Verified' : 'Pending'}
+                    </div>
+                    
+                    {/* Activity Status */}
                     <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       student.isActive 
-                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        ? 'bg-blue-100 text-blue-800 border border-blue-200' 
                         : 'bg-red-100 text-red-800 border border-red-200'
                     }`}>
                       {student.isActive ? 'Active' : 'Inactive'}
                     </div>
+                    
                     {student.lastLogin && (
                       <p className="text-xs text-gray-500 mt-1">
                         Last login: {new Date(student.lastLogin).toLocaleDateString()}
