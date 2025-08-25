@@ -81,7 +81,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="relative bg-black h-screen overflow-hidden">
+    <div className="relative h-screen overflow-hidden" style={{ backgroundColor: '#0b0b12' }}>
       {/* Hyperspeed Background - Fixed and unaffected by scroll */}
       <div className="fixed inset-0 z-0">
         <MemoizedHyperspeed />

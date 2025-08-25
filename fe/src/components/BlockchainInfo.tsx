@@ -129,7 +129,7 @@ export default function BlockchainInfo({ profile, userAddress }: BlockchainInfoP
             {profile?.did && (
               <button
                 onClick={() => handleCopy(profile.did, 'did-full')}
-                className="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm"
+                className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm"
               >
                 {copied === 'did-full' ? 'Copied!' : 'Copy Full DID'}
               </button>

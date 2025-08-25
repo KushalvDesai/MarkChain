@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen" style={{ backgroundColor: '#0b0b12' }}>
         <DynamicNavbar />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="text-center">
@@ -138,7 +138,7 @@ export default function ProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen" style={{ backgroundColor: '#0b0b12' }}>
         <DynamicNavbar />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="text-center">
@@ -165,7 +165,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen" style={{ backgroundColor: '#0b0b12' }}>
         {/* Dynamic Navbar */}
         <DynamicNavbar />
         
@@ -181,7 +181,7 @@ export default function ProfilePage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 pt-4 h-[calc(100vh-160px)]">
         {/* Profile Information */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/10 before:via-transparent before:to-transparent before:rounded-2xl">
+        <div className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:via-transparent before:to-transparent before:rounded-2xl" style={{ backgroundColor: '#12121a' }}>
           <MagicBento 
             textAutoHide={true}
             enableStars={false}
@@ -192,7 +192,7 @@ export default function ProfilePage() {
             clickEffect={true}
             spotlightRadius={500}
             particleCount={12}
-            glowColor="132, 0, 255"
+            glowColor="180, 180, 200"
             cards={[{
               color: "transparent",
               title: "Profile Information",
@@ -217,7 +217,7 @@ export default function ProfilePage() {
         </div>
         
         {/* Blockchain Information */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/10 before:via-transparent before:to-transparent before:rounded-2xl">
+        <div className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:via-transparent before:to-transparent before:rounded-2xl" style={{ backgroundColor: '#12121a' }}>
           <MagicBento 
             textAutoHide={true}
             enableStars={false}
@@ -228,7 +228,7 @@ export default function ProfilePage() {
             clickEffect={true}
             spotlightRadius={300}
             particleCount={8}
-            glowColor="132, 0, 255"
+            glowColor="180, 180, 200"
             cards={[{
               color: "transparent",
               title: "Blockchain Identity",

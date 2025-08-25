@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, fallback }: ProtectedRoutePro
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0b0b12' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
           <p className="text-gray-300">Checking authentication...</p>
@@ -34,7 +34,7 @@ export default function ProtectedRoute({ children, fallback }: ProtectedRoutePro
   // Show fallback or redirect if not authenticated
   if (!isAuthenticated) {
     return fallback || (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0b0b12' }}>
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2 text-white">Access Denied</h2>
           <p className="text-gray-300 mb-4">Please log in to access this page.</p>

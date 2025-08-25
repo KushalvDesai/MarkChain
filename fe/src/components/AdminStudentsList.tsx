@@ -1,7 +1,85 @@
 "use client";
 
-import { useGetAllUsers, useGetUsersByRole } from "@/hooks/useGraphQL";
+import { useGetAllUsers, useGetUsersByRole, useGetUserProfile } from "@/hooks/useGraphQL";
 import { UserRole } from "@/gql/types";
+import { useMemo } from "react";
+
+// Component to handle individual student profile fetching
+function StudentCard({ student }: { student: any }) {
+  const { data: profileData, loading: profileLoading } = useGetUserProfile(student.walletAddress);
+  
+  // Use profile data if available, otherwise fall back to student data
+  const studentProfile = profileData?.getUserProfile || student;
+  const hasStudentId = Boolean(studentProfile.studentId);
+  
+  return (
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-lg">
+              {studentProfile.name 
+                ? studentProfile.name.charAt(0).toUpperCase()
+                : studentProfile.walletAddress.slice(2, 4).toUpperCase()
+              }
+            </span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">
+              {studentProfile.name || 'Anonymous Student'}
+            </h3>
+            <p className="text-sm text-gray-400">
+              {hasStudentId ? `ID: ${studentProfile.studentId}` : 'No Student ID'}
+            </p>
+            {studentProfile.email && (
+              <p className="text-xs text-gray-500">
+                {studentProfile.email}
+              </p>
+            )}
+            <p className="text-xs text-gray-500 font-mono">
+              {`${studentProfile.walletAddress.slice(0, 6)}...${studentProfile.walletAddress.slice(-4)}`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-3">
+          <div className="text-right">
+            {/* Verification Status - now based on actual studentId existence */}
+            <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-1 ${
+              hasStudentId
+                ? 'bg-green-100 text-green-800 border border-green-200' 
+                : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                hasStudentId ? 'bg-green-500' : 'bg-yellow-500'
+              }`}></div>
+              {profileLoading ? 'Checking...' : (hasStudentId ? 'Verified' : 'Pending')}
+            </div>
+            
+            {/* Activity Status */}
+            <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              studentProfile.isActive 
+                ? 'bg-blue-100 text-blue-800 border border-blue-200' 
+                : 'bg-red-100 text-red-800 border border-red-200'
+            }`}>
+              {studentProfile.isActive ? 'Active' : 'Inactive'}
+            </div>
+            
+            {studentProfile.lastLogin && (
+              <p className="text-xs text-gray-500 mt-1">
+                Last login: {new Date(studentProfile.lastLogin).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminStudentsList() {
   // Use both queries to get comprehensive student data
@@ -125,74 +203,7 @@ export default function AdminStudentsList() {
           </div>
         ) : (
           students.map((student: any, index: number) => (
-            <div
-              key={student._id || index}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">
-                      {student.name 
-                        ? student.name.charAt(0).toUpperCase()
-                        : student.walletAddress.slice(2, 4).toUpperCase()
-                      }
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">
-                      {student.name || 'Anonymous Student'}
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      {student.studentId ? `ID: ${student.studentId}` : 'No Student ID'}
-                    </p>
-                    {student.email && (
-                      <p className="text-xs text-gray-500">
-                        {student.email}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-500 font-mono">
-                      {`${student.walletAddress.slice(0, 6)}...${student.walletAddress.slice(-4)}`}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="text-right">
-                    {/* Verification Status */}
-                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-1 ${
-                      student.studentId 
-                        ? 'bg-green-100 text-green-800 border border-green-200' 
-                        : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                    }`}>
-                      <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                        student.studentId ? 'bg-green-500' : 'bg-yellow-500'
-                      }`}></div>
-                      {student.studentId ? 'Verified' : 'Pending'}
-                    </div>
-                    
-                    {/* Activity Status */}
-                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      student.isActive 
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200' 
-                        : 'bg-red-100 text-red-800 border border-red-200'
-                    }`}>
-                      {student.isActive ? 'Active' : 'Inactive'}
-                    </div>
-                    
-                    {student.lastLogin && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Last login: {new Date(student.lastLogin).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                  <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <StudentCard key={student._id || student.walletAddress || index} student={student} />
           ))
         )}
       </div>
