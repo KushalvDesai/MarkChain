@@ -99,7 +99,7 @@ export default function LatestCredential() {
             </p>
             <button 
               onClick={handleCopyHash}
-              className={`ml-3 px-3 py-1 ${copied ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-700'} text-white text-xs rounded transition-colors`}
+              className={`ml-3 px-3 py-1 ${copied ? 'bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'} text-white text-xs rounded transition-colors`}
             >
               {copied ? 'Copied!' : 'Copy Full Hash'}
             </button>
@@ -114,7 +114,7 @@ export default function LatestCredential() {
           
           <button 
             onClick={() => window.open(`https://ipfs.io/ipfs/${credential.ipfsHash}`, '_blank')}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded transition-colors"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
           >
             View on IPFS
           </button>

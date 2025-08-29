@@ -33,6 +33,9 @@ export default function MetaMaskLoginButton() {
           } else if (result.user.role === UserRole.STUDENT) {
             console.log('Redirecting to student dashboard');
             router.push('/student');
+          } else if (result.user.role === UserRole.TEACHER) {
+            console.log('Redirecting to teacher dashboard');
+            router.push('/teacher');
           } else {
             // Default to student dashboard for any other role
             console.log('Unknown role, redirecting to student dashboard');

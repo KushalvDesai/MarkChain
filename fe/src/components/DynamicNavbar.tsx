@@ -19,6 +19,13 @@ export default function DynamicNavbar() {
     { label: "Profile", href: "/profile" },
   ];
 
+  // Faculty navigation items
+  const facultyNavItems = [
+    { label: "Dashboard", href: "/teacher"},
+    { label: "Profile", href: "/profile"},
+    { label: "Courses", href: "/teacher/courses"},
+  ]
+
   // Student navigation items
   const studentNavItems = [
     { label: "Dashboard", href: "/student" },
@@ -30,11 +37,15 @@ export default function DynamicNavbar() {
   const getNavItems = () => {
     console.log('getNavItems - Checking user role:', user?.role);
     console.log('getNavItems - Is role ADMIN?', user?.role === UserRole.ADMIN);
+    console.log('getNavItems - Is role TEACHER?', user?.role === UserRole.TEACHER);
     console.log('getNavItems - UserRole enum values:', UserRole);
     
     if (user?.role === UserRole.ADMIN) {
       console.log('getNavItems - Using admin navigation');
       return adminNavItems;
+    } else if (user?.role === UserRole.TEACHER) {
+      console.log('getNavItems - Using faculty navigation');
+      return facultyNavItems;
     }
     // Default to student navigation for STUDENT role or any other role
     console.log('getNavItems - Using student navigation');
