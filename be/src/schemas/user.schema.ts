@@ -29,6 +29,9 @@ export class User {
   @Prop({ unique: true, sparse: true })
   studentId?: string;
 
+  @Prop()
+  batch?: string;
+
   @Prop({ default: true })
   isActive: boolean;
 
@@ -44,6 +47,26 @@ export class User {
 
   @Prop({ default: false })
   isVerified?: boolean;
+
+  // Blockchain integration fields
+  @Prop({ unique: true, sparse: true })
+  email?: string; // For traditional login support
+
+  @Prop()
+  password?: string; // For traditional login support
+
+  @Prop()
+  didHash?: string; // The hashed DID stored on blockchain
+
+  @Prop()
+  blockchainRole?: string; // Role assigned on blockchain (TEACHER_ROLE, STUDENT_ROLE)
+
+  @Prop({ default: false })
+  didRegistered?: boolean; // Whether DID is registered on blockchain
+
+  @Prop([String])
+  assignedSubjects?: string[]; // Subjects assigned to teachers
 }
+
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -32,9 +32,20 @@ export class Credential {
   @Prop()
   revokedBy?: string;
 
+  // Blockchain integration fields
   @Prop()
   blockchainTxHash?: string; // Transaction hash when anchored on blockchain
 
+  @Prop()
+  ipfsHash?: string; // IPFS hash where credential data is stored
+
+  @Prop()
+  issuerAddress?: string; // Ethereum address of the issuer
+
+  @Prop({ default: 'pending' })
+  blockchainStatus?: string; // 'pending', 'confirmed', 'failed'
+
+  // Academic fields
   @Prop()
   academicYear?: string;
 
@@ -43,6 +54,15 @@ export class Credential {
 
   @Prop()
   examType?: string; // 'midterm', 'final', 'assignment', etc.
+
+  @Prop()
+  studentName?: string; // For easier queries
+
+  @Prop()
+  institution?: string; // Institution name
+
+  @Prop()
+  grade?: string; // Letter grade (A+, A, B+, etc.)
 }
 
 export const CredentialSchema = SchemaFactory.createForClass(Credential);

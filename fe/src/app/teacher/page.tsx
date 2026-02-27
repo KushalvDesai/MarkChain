@@ -6,6 +6,7 @@ import TeacherCourses from "@/components/TeacherCourses";
 import TeacherAnalytics from "@/components/TeacherAnalytics";
 import MagicBento from "@/components/MagicBento";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminStudentsList from "@/components/AdminStudentsList";
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -50,7 +51,7 @@ export default function TeacherDashboard() {
             />
           </div>
           
-          {/* Rectangle 2 - Teaching Analytics */}
+          {/* Rectangle 2 - Student Management */}
           <div className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:via-transparent before:to-transparent before:rounded-2xl" style={{ backgroundColor: '#12121a' }}>
             <MagicBento 
               textAutoHide={true}
@@ -65,10 +66,10 @@ export default function TeacherDashboard() {
               glowColor="180, 180, 200"
               cards={[{
                 color: "transparent",
-                title: "Teaching Analytics",
-                description: "Track performance and engagement",
-                label: "Analytics",
-                children: <TeacherAnalytics />
+                title: "Student Management",
+                description: "View and manage your students",
+                label: "Students",
+                children: <AdminStudentsList />
               }]}
             />
           </div>

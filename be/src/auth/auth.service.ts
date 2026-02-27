@@ -105,6 +105,9 @@ export class AuthService {
       user.did = `did:ethr:${walletAddress.toLowerCase()}`;
     }
 
+    // Note: DID registration on blockchain will be done separately via the blockchain resolver
+    // This keeps the auth service focused on authentication only
+
     // Ensure role is set
     if (!user.role) {
       user.role = UserRole.STUDENT;

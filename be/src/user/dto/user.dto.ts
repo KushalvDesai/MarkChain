@@ -1,5 +1,6 @@
 import { InputType, Field, ObjectType, ID, registerEnumType } from '@nestjs/graphql';
 import { UserRole } from '../../schemas/user.schema';
+import { IsString, IsEmail, Length, Matches, IsOptional } from 'class-validator';
 
 // Register enum for GraphQL
 registerEnumType(UserRole, {
@@ -53,9 +54,16 @@ export class UserDto {
 @InputType()
 export class UpdateUserProfileDto {
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(2, 100)
+  @Matches(/^[a-zA-Z\s]+$/, { message: 'Name can only contain letters' })
   name?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z0-9]{5,15}$/, { message: 'Invalid student ID format' })
   studentId?: string;
 }
 
@@ -68,12 +76,19 @@ export class SendOTPDto {
 @InputType()
 export class VerifyOTPDto {
   @Field()
+  @IsString()
+  @Length(6, 6)
+  @Matches(/^\d{6}$/, { message: 'OTP must be 6 digits' })
   otp: string;
 
   @Field()
+  @IsString()
+  @Length(2, 100)
   name: string;
 
   @Field()
+  @IsString()
+  @Matches(/^[A-Z0-9]{5,15}$/)
   studentId: string;
 }
 
@@ -91,6 +106,65 @@ export class OTPResponseDto {
 
 @ObjectType()
 export class VerifyOTPResponseDto {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+
+  @Field(() => UserDto, { nullable: true })
+  user?: UserDto;
+}
+
+// Teacher and Admin Profile Update with Email OTP
+@InputType()
+export class SendEmailOTPDto {
+  @Field()
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(2, 100)
+  @Matches(/^[a-zA-Z\s]+$/)
+  name?: string;
+}
+
+@InputType()
+export class VerifyEmailOTPDto {
+  @Field()
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+
+  @Field()
+  @IsString()
+  @Length(6, 6, { message: 'OTP must be exactly 6 characters' })
+  @Matches(/^\d{6}$/, { message: 'OTP must be 6 digits' })
+  otp: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(2, 100)
+  @Matches(/^[a-zA-Z\s]+$/)
+  name?: string;
+}
+
+@ObjectType()
+export class EmailOTPResponseDto {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+
+  @Field({ nullable: true })
+  email?: string;
+}
+
+@ObjectType()
+export class VerifyEmailOTPResponseDto {
   @Field()
   success: boolean;
 

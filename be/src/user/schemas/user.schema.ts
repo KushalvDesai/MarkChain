@@ -55,4 +55,23 @@ export class UserSchema {
 
   @Field({ nullable: true })
   isVerified?: boolean;
+
+  // Blockchain integration fields
+  @Field({ nullable: true })
+  email?: string; // For traditional login support
+
+  @Field({ nullable: true })
+  password?: string; // For traditional login support
+
+  @Field({ nullable: true })
+  didHash?: string; // The hashed DID stored on blockchain
+
+  @Field({ nullable: true })
+  blockchainRole?: string; // Role assigned on blockchain (TEACHER_ROLE, STUDENT_ROLE)
+
+  @Field({ nullable: true })
+  didRegistered?: boolean; // Whether DID is registered on blockchain
+
+  @Field(() => [String], { nullable: true })
+  assignedSubjects?: string[]; // Subjects assigned to teachers
 }

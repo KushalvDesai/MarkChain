@@ -16,14 +16,17 @@ export default function DynamicNavbar() {
   const adminNavItems = [
     { label: "Dashboard", href: "/admin" },
     { label: "Students", href: "/admin/students" },
+    { label: "Blockchain", href: "/admin/blockchain" },
+    { label: "Schedule", href: "/admin/schedule" },
     { label: "Profile", href: "/profile" },
   ];
 
   // Faculty navigation items
   const facultyNavItems = [
     { label: "Dashboard", href: "/teacher"},
+    { label: "Students", href: "/teacher/students"},
+    { label: "Credentials", href: "/teacher/credentials"},
     { label: "Profile", href: "/profile"},
-    { label: "Courses", href: "/teacher/courses"},
   ]
 
   // Student navigation items

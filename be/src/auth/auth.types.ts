@@ -1,4 +1,5 @@
 import { ObjectType, Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { IsString, IsNotEmpty, Matches, Length } from 'class-validator';
 import { UserRole } from '../schemas/user.schema';
 
 // Register the UserRole enum for GraphQL
@@ -45,11 +46,20 @@ export class AuthResponse {
 @InputType()
 export class VerifySignatureInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid Ethereum wallet address' })
   walletAddress: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^0x[a-fA-F0-9]+$/, { message: 'Invalid signature format' })
   signature: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
+  @Length(32, 128, { message: 'Invalid nonce format' })
   nonce: string;
 }

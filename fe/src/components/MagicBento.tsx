@@ -673,7 +673,43 @@ const MagicBento: React.FC<BentoProps> = ({
                 clickEffect={clickEffect}
                 enableMagnetism={enableMagnetism}
               >
-                {card.children || (
+                <div className="card__body flex-1 min-h-0 overflow-auto">
+                  {card.children ? (
+                    card.children
+                  ) : (
+                    <>
+                      <div className="card__header flex justify-between gap-3 relative text-white">
+                        <span className="card__label text-base">{card.label}</span>
+                      </div>
+                      <div className="card__content flex flex-col relative text-white">
+                        <h3
+                          className={`card__title font-normal text-base m-0 mb-1 ${textAutoHide ? "text-clamp-1" : ""}`}
+                        >
+                          {card.title}
+                        </h3>
+                        <p
+                          className={`card__description text-xs leading-5 opacity-90 ${textAutoHide ? "text-clamp-2" : ""}`}
+                        >
+                          {card.description}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </ParticleCard>
+            );
+          }
+
+          return (
+            <div
+              key={index}
+              className={baseClassName}
+              style={cardStyle}
+            >
+              <div className="card__body flex-1 min-h-0 overflow-auto">
+                {card.children ? (
+                  card.children
+                ) : (
                   <>
                     <div className="card__header flex justify-between gap-3 relative text-white">
                       <span className="card__label text-base">{card.label}</span>
@@ -692,35 +728,7 @@ const MagicBento: React.FC<BentoProps> = ({
                     </div>
                   </>
                 )}
-              </ParticleCard>
-            );
-          }
-
-          return (
-            <div
-              key={index}
-              className={baseClassName}
-              style={cardStyle}
-            >
-              {card.children || (
-                <>
-                  <div className="card__header flex justify-between gap-3 relative text-white">
-                    <span className="card__label text-base">{card.label}</span>
-                  </div>
-                  <div className="card__content flex flex-col relative text-white">
-                    <h3
-                      className={`card__title font-normal text-base m-0 mb-1 ${textAutoHide ? "text-clamp-1" : ""}`}
-                    >
-                      {card.title}
-                    </h3>
-                    <p
-                      className={`card__description text-xs leading-5 opacity-90 ${textAutoHide ? "text-clamp-2" : ""}`}
-                    >
-                      {card.description}
-                    </p>
-                  </div>
-                </>
-              )}
+              </div>
             </div>
           );
         })}

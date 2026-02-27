@@ -248,6 +248,9 @@ export class UserService {
       .select('-nonce')
       .exec();
 
+      // Note: Blockchain role assignment should be done separately via the blockchain resolver
+      // This keeps the user service focused on user management only
+
       return {
         success: true,
         message: 'Profile updated successfully',
@@ -267,5 +270,284 @@ export class UserService {
       .find({ isActive: true })
       .select('-nonce')
       .exec();
+  }
+
+  // Blockchain integration methods
+  async linkWallet(userId: string, walletAddress: string): Promise<any> {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { 
+        $set: { 
+          walletAddress: walletAddress.toLowerCase() 
+        } 
+      },
+      { new: true }
+    ).select('-nonce').exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return user;
+  }
+
+  async updateBlockchainRole(walletAddress: string, role: string): Promise<any> {
+    const user = await this.userModel.findOneAndUpdate(
+      { walletAddress: walletAddress.toLowerCase() },
+      { 
+        $set: { 
+          blockchainRole: role 
+        } 
+      },
+      { new: true }
+    ).select('-nonce').exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with wallet address ${walletAddress} not found`);
+    }
+
+    return user;
+  }
+
+  async updateDIDStatus(userId: string, didHash: string, didRegistered: boolean): Promise<any> {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { 
+        $set: { 
+          didHash: didHash,
+          didRegistered: didRegistered 
+        } 
+      },
+      { new: true }
+    ).select('-nonce').exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return user;
+  }
+
+  async addSubjectToTeacher(teacherAddress: string, subject: string): Promise<any> {
+    const user = await this.userModel.findOneAndUpdate(
+      { 
+        walletAddress: teacherAddress.toLowerCase(),
+        role: UserRole.TEACHER 
+      },
+      { 
+        $addToSet: { 
+          assignedSubjects: subject 
+        } 
+      },
+      { new: true }
+    ).select('-nonce').exec();
+
+    if (!user) {
+      throw new NotFoundException(`Teacher with wallet address ${teacherAddress} not found`);
+    }
+
+    return user;
+  }
+
+  async removeSubjectFromTeacher(teacherAddress: string, subject: string): Promise<any> {
+    const user = await this.userModel.findOneAndUpdate(
+      { 
+        walletAddress: teacherAddress.toLowerCase(),
+        role: UserRole.TEACHER 
+      },
+      { 
+        $pull: { 
+          assignedSubjects: subject 
+        } 
+      },
+      { new: true }
+    ).select('-nonce').exec();
+
+    if (!user) {
+      throw new NotFoundException(`Teacher with wallet address ${teacherAddress} not found`);
+    }
+
+    return user;
+  }
+
+  async getUserByWalletAddress(walletAddress: string): Promise<any> {
+    const user = await this.userModel.findOne({
+      walletAddress: walletAddress.toLowerCase(),
+      isActive: true,
+    })
+    .select('-nonce')
+    .exec();
+
+    return user;
+  }
+
+  // Email OTP Methods for Teachers and Admins
+  async sendEmailOTPForProfile(
+    walletAddress: string,
+    email: string,
+    name?: string
+  ): Promise<{ success: boolean; message: string; email?: string }> {
+    try {
+      // Find the user
+      const user = await this.userModel.findOne({
+        walletAddress: walletAddress.toLowerCase(),
+        isActive: true
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Only allow teachers and admins
+      if (user.role !== UserRole.TEACHER && user.role !== UserRole.ADMIN) {
+        throw new BadRequestException('This feature is only available for teachers and admins');
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new BadRequestException('Invalid email format');
+      }
+
+      // Check if email is already taken by another user
+      const existingUser = await this.userModel.findOne({
+        email: email.toLowerCase(),
+        walletAddress: { $ne: walletAddress.toLowerCase() }
+      });
+
+      if (existingUser) {
+        throw new BadRequestException('Email already exists for another user');
+      }
+
+      // Generate OTP and set expiry (10 minutes)
+      const otp = this.generateOTP();
+      const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+      // Update user with OTP details
+      await this.userModel.findOneAndUpdate(
+        { walletAddress: walletAddress.toLowerCase() },
+        {
+          $set: {
+            otp: otp,
+            otpExpiry: otpExpiry,
+          }
+        }
+      );
+
+      // Send OTP email
+      const emailSent = await this.emailService.sendOTP(
+        email,
+        otp,
+        name || user.name || 'User'
+      );
+
+      if (!emailSent) {
+        throw new Error('Failed to send OTP email');
+      }
+
+      return {
+        success: true,
+        message: 'OTP sent successfully to your email',
+        email: email
+      };
+    } catch (error) {
+      console.error('Error sending email OTP:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to send OTP'
+      };
+    }
+  }
+
+  async verifyEmailOTPAndUpdateProfile(
+    walletAddress: string,
+    email: string,
+    otp: string,
+    name?: string
+  ): Promise<{ success: boolean; message: string; user?: any }> {
+    try {
+      // Find user with matching OTP
+      const user = await this.userModel.findOne({
+        walletAddress: walletAddress.toLowerCase(),
+        otp: otp,
+        isActive: true
+      });
+
+      if (!user) {
+        throw new BadRequestException('Invalid OTP');
+      }
+
+      // Only allow teachers and admins
+      if (user.role !== UserRole.TEACHER && user.role !== UserRole.ADMIN) {
+        throw new BadRequestException('This feature is only available for teachers and admins');
+      }
+
+      // Check if OTP has expired
+      if (!user.otpExpiry || new Date() > user.otpExpiry) {
+        await this.userModel.findOneAndUpdate(
+          { walletAddress: walletAddress.toLowerCase() },
+          {
+            $unset: {
+              otp: 1,
+              otpExpiry: 1
+            }
+          }
+        );
+        throw new BadRequestException('OTP has expired');
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new BadRequestException('Invalid email format');
+      }
+
+      // Check for duplicate email
+      const existingUser = await this.userModel.findOne({
+        email: email.toLowerCase(),
+        walletAddress: { $ne: walletAddress.toLowerCase() }
+      });
+
+      if (existingUser) {
+        throw new BadRequestException('Email already exists for another user');
+      }
+
+      // Prepare update payload
+      const updatePayload: any = {
+        email: email.toLowerCase(),
+        isVerified: true
+      };
+
+      if (name) {
+        updatePayload.name = name;
+      }
+
+      // Update user profile
+      const updatedUser = await this.userModel.findOneAndUpdate(
+        { walletAddress: walletAddress.toLowerCase() },
+        {
+          $set: updatePayload,
+          $unset: {
+            otp: 1,
+            otpExpiry: 1
+          }
+        },
+        { new: true }
+      )
+      .select('-nonce -password')
+      .exec();
+
+      return {
+        success: true,
+        message: 'Profile updated successfully',
+        user: updatedUser
+      };
+    } catch (error) {
+      console.error('Error verifying email OTP:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to verify OTP'
+      };
+    }
   }
 }
