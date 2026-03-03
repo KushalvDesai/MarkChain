@@ -19,7 +19,7 @@ export class TeacherService {
     private blockchainService: BlockchainService,
     private ipfsService: IPFSService,
     private notificationService: NotificationService,
-  ) {}
+  ) { }
 
   // Get Teacher Dashboard - Course Setup
   async getCourseSetup(teacherWalletAddress: string): Promise<any> {
@@ -81,8 +81,8 @@ export class TeacherService {
       role: 'STUDENT',
       isActive: true,
     })
-    .select('-nonce -password')
-    .exec();
+      .select('-nonce -password')
+      .exec();
 
     return students.map(student => ({
       _id: student._id,
@@ -266,11 +266,17 @@ export class TeacherService {
       const ipfsHash = await this.ipfsService.uploadJSON(vcJson);
       credential.ipfsHash = ipfsHash;
 
-      // Anchor on blockchain
-      const txHash = await this.blockchainService.issueCredential(
-        credential.studentDID,
-        vcHash,
-        ipfsHash
+      // Anchor on blockchain using new createCredential method
+      // Extract student address from DID (format: did:ethr:0xAddress)
+      const addressMatch = credential.studentDID.match(/0x[a-fA-F0-9]{40}/);
+      const studentAddress = addressMatch ? addressMatch[0] : credential.studentDID;
+      const subject = vcJson?.credentialSubject?.achievement?.subject || 'unknown';
+
+      const txHash = await this.blockchainService.createCredential(
+        studentAddress,
+        subject,
+        ipfsHash,
+        31536000 // 1 year validity
       );
       credential.blockchainTxHash = txHash;
       credential.blockchainStatus = 'confirmed';

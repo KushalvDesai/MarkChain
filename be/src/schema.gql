@@ -186,6 +186,40 @@ type CredentialTxResponse {
   message: String
 }
 
+type CredentialStatsResponse {
+  exists: Boolean!
+  isValid: Boolean!
+  componentsGraded: Float!
+  totalComponentsInSubject: Float!
+  completionPercentage: Float!
+}
+
+type ComponentHistoryEntry {
+  componentName: String!
+  ipfsHash: String!
+  updatedBy: String!
+  timestamp: String!
+  credentialVersion: String!
+}
+
+type CredentialDetailResponse {
+  ipfsHash: String!
+  version: String!
+  totalComponents: String!
+  createdAt: String!
+  lastUpdatedAt: String!
+  expiresAt: String!
+  revoked: Boolean!
+  isExpired: Boolean!
+}
+
+type BatchUpdateResponse {
+  success: Boolean!
+  txHash: String!
+  studentsProcessed: Float!
+  message: String
+}
+
 type AssignBlockchainRoleResponse {
   success: Boolean!
   message: String!
@@ -333,13 +367,25 @@ type Query {
   validateTimestamp(timestamp: Float!, maxAgeMs: Float! = 300000): Boolean!
   getMyBlockchainStatus: BlockchainUserStatus!
   getMyAssignedSubjects: [String!]!
-  getMySubjectCredential(subject: String!): BlockchainCredential
+  getMyCredentialDetail(subject: String!): CredentialDetailResponse
+  getStudentCredentialDetail(input: StudentSubjectInput!): CredentialDetailResponse
   getMyBlockchainCredentials: [BlockchainCredential!]!
-  verifyBlockchainCredential(input: VerifyCredentialInput!): BlockchainCredential
+  verifyBlockchainCredential(input: VerifyCredentialInput!): CredentialDetailResponse
   getBlockchainNetworkInfo: NetworkInfo!
   testIPFSConnection: Boolean!
   getAllSubjects: [SubjectResponse!]!
   getSubjectComponents(subjectName: String!): [ComponentResponse!]!
+  isValidComponent(input: ComponentQueryInput!): Boolean!
+  getCredentialStats(input: StudentSubjectInput!): CredentialStatsResponse!
+  getMyComponentHistory(subject: String!): [ComponentHistoryEntry!]!
+  getStudentComponentHistory(input: StudentSubjectInput!): [ComponentHistoryEntry!]!
+  isCredentialValid(input: StudentSubjectInput!): Boolean!
+  subjectExistsOnChain(subject: String!): Boolean!
+  hasTeacherSubject(teacherAddress: String!, subject: String!): Boolean!
+  getTeacherSubjectCount(teacherAddress: String!): Float!
+  didToAddress(didHash: String!): String!
+  getRoleAdmin(role: String!): String!
+  supportsInterface(interfaceId: String!): Boolean!
   getAllTeacherSubjects: [TeacherSubjectDto!]!
   getTeacherSubjectsByTeacher(teacherWalletAddress: String!): [TeacherSubjectDto!]!
   getAllExamSchedules: [ExamScheduleDto!]!
@@ -356,9 +402,19 @@ input ValidateDIDDto {
   did: String!
 }
 
+input StudentSubjectInput {
+  studentAddress: String!
+  subject: String!
+}
+
 input VerifyCredentialInput {
   studentAddress: String!
   subject: String!
+}
+
+input ComponentQueryInput {
+  subjectName: String!
+  componentName: String!
 }
 
 type Mutation {
@@ -377,10 +433,14 @@ type Mutation {
   revokeBlockchainCredential(input: RevokeCredentialInput!): TransactionResponse!
   linkWalletAddress(input: LinkWalletInput!): TransactionResponse!
   registerUserDID(input: RegisterDIDInput!): TransactionResponse!
-  issueBlockchainCredential(input: IssueBlockchainCredentialInput!): TransactionResponse!
+  updateComponentGrade(input: UpdateComponentGradeInput!): TransactionResponse!
   createSubject(input: CreateSubjectInput!): SubjectWithComponentsResponse!
   registerComponent(input: RegisterComponentInput!): ComponentWithTxResponse!
   createNewCredential(input: CreateCredentialInput!): CredentialTxResponse!
+  removeComponent(input: RemoveComponentInput!): TransactionResponse!
+  batchUpdateComponentGrade(input: BatchUpdateComponentInput!): BatchUpdateResponse!
+  registerDIDForUser(input: RegisterDIDForUserInput!): TransactionResponse!
+  renounceRole(input: RenounceRoleInput!): TransactionResponse!
   createTeacherSubject(input: CreateTeacherSubjectInput!): TeacherSubjectDto!
   updateTeacherSubject(input: UpdateTeacherSubjectInput!): TeacherSubjectDto!
   deleteTeacherSubject(subjectId: String!): AssignBlockchainRoleResponse!
@@ -454,10 +514,11 @@ input RegisterDIDInput {
   did: String!
 }
 
-input IssueBlockchainCredentialInput {
+input UpdateComponentGradeInput {
   studentAddress: String!
-  subject: String!
-  credentialData: String!
+  subjectName: String!
+  componentName: String!
+  gradeData: String!
 }
 
 input CreateSubjectInput {
@@ -479,6 +540,28 @@ input CreateCredentialInput {
   subjectName: String!
   credentialData: String!
   validityPeriod: Float = 31536000
+}
+
+input RemoveComponentInput {
+  subjectName: String!
+  componentName: String!
+}
+
+input BatchUpdateComponentInput {
+  studentAddresses: [String!]!
+  subjectName: String!
+  componentName: String!
+  gradeDataArray: [String!]!
+}
+
+input RegisterDIDForUserInput {
+  userAddress: String!
+  did: String!
+}
+
+input RenounceRoleInput {
+  role: String!
+  callerConfirmation: String!
 }
 
 input CreateTeacherSubjectInput {

@@ -332,8 +332,8 @@ export class ComponentWithTxResponse {
   component: ComponentResponse;
 }
 
-@InputType() 
-export class CreateCredentialInput{
+@InputType()
+export class CreateCredentialInput {
   @Field()
   studentAddress: string;
 
@@ -343,13 +343,13 @@ export class CreateCredentialInput{
   @Field()
   credentialData: string;
 
-  @Field({nullable : true , defaultValue :31536000 })
+  @Field({ nullable: true, defaultValue: 31536000 })
   validityPeriod?: number;
 }
 
 @ObjectType()
 export class CredentialTxResponse {
-    @Field()
+  @Field()
   success: boolean;
 
   @Field()
@@ -363,7 +363,7 @@ export class CredentialTxResponse {
 
 }
 
-@InputType() 
+@InputType()
 export class gradeComponentInput {
   @Field()
   studentAddress: string;
@@ -377,3 +377,183 @@ export class gradeComponentInput {
   @Field()
   gradeData: string; // JSON STRING 
 }
+
+// ==================== NEW TYPES FOR REMAINING APIs ====================
+
+@InputType()
+export class RemoveComponentInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  subjectName: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  componentName: string;
+}
+
+@InputType()
+export class BatchUpdateComponentInput {
+  @Field(() => [String])
+  studentAddresses: string[];
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  subjectName: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  componentName: string;
+
+  @Field(() => [String])
+  gradeDataArray: string[]; // Array of JSON strings, one per student
+}
+
+@InputType()
+export class ComponentQueryInput {
+  @Field()
+  @IsString()
+  subjectName: string;
+
+  @Field()
+  @IsString()
+  componentName: string;
+}
+
+@InputType()
+export class StudentSubjectInput {
+  @Field()
+  @IsString()
+  studentAddress: string;
+
+  @Field()
+  @IsString()
+  subject: string;
+}
+
+@InputType()
+export class RegisterDIDForUserInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  userAddress: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  did: string;
+}
+
+@InputType()
+export class UpdateComponentGradeInput {
+  @Field()
+  @IsString()
+  studentAddress: string;
+
+  @Field()
+  @IsString()
+  subjectName: string;
+
+  @Field()
+  @IsString()
+  componentName: string;
+
+  @Field()
+  @IsString()
+  gradeData: string; // JSON string of grade data
+}
+
+@InputType()
+export class RenounceRoleInput {
+  @Field()
+  @IsString()
+  role: string; // 'TEACHER_ROLE' or 'STUDENT_ROLE'
+
+  @Field()
+  @IsString()
+  callerConfirmation: string; // caller's own address for safety
+}
+
+// ==================== NEW OUTPUT TYPES ====================
+
+@ObjectType()
+export class CredentialStatsResponse {
+  @Field()
+  exists: boolean;
+
+  @Field()
+  isValid: boolean;
+
+  @Field()
+  componentsGraded: number;
+
+  @Field()
+  totalComponentsInSubject: number;
+
+  @Field()
+  completionPercentage: number;
+}
+
+@ObjectType()
+export class ComponentHistoryEntry {
+  @Field()
+  componentName: string;
+
+  @Field()
+  ipfsHash: string;
+
+  @Field()
+  updatedBy: string;
+
+  @Field()
+  timestamp: string;
+
+  @Field()
+  credentialVersion: string;
+}
+
+@ObjectType()
+export class CredentialDetailResponse {
+  @Field()
+  ipfsHash: string;
+
+  @Field()
+  version: string;
+
+  @Field()
+  totalComponents: string;
+
+  @Field()
+  createdAt: string;
+
+  @Field()
+  lastUpdatedAt: string;
+
+  @Field()
+  expiresAt: string;
+
+  @Field()
+  revoked: boolean;
+
+  @Field()
+  isExpired: boolean;
+}
+
+@ObjectType()
+export class BatchUpdateResponse {
+  @Field()
+  success: boolean;
+
+  @Field()
+  txHash: string;
+
+  @Field()
+  studentsProcessed: number;
+
+  @Field({ nullable: true })
+  message?: string;
+}
+

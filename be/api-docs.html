@@ -1084,7 +1084,9 @@
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">TEACHER / ADMIN</span>
                 </div>
-                <p class="op-desc">Create an initial blockchain credential for a student in a subject. Uploads credential data to IPFS, then anchors the hash on-chain. Subject must already exist. Student must have a registered DID on-chain.</p>
+                <p class="op-desc">Create an initial blockchain credential for a student in a subject. Uploads
+                    credential data to IPFS, then anchors the hash on-chain. Subject must already exist. Student must
+                    have a registered DID on-chain.</p>
                 <div class="code-wrap">
                     <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     <pre class="code-block">mutation CreateNewCredential($input: CreateCredentialInput!) {
@@ -1108,22 +1110,644 @@
                 </div>
                 <p class="response-title">Input → CreateCredentialInput</p>
                 <table>
-                    <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
-                    <tr><td><code>studentAddress</code></td><td>String</td><td><span class="required">Required</span></td><td>Student's wallet address (0x...)</td></tr>
-                    <tr><td><code>subjectName</code></td><td>String</td><td><span class="required">Required</span></td><td>Subject name — must exist in DB</td></tr>
-                    <tr><td><code>credentialData</code></td><td>String</td><td><span class="required">Required</span></td><td>JSON string of credential info (studentName, grade, marks, etc.)</td></tr>
-                    <tr><td><code>validityPeriod</code></td><td>Int</td><td><span class="optional">Optional</span></td><td>Validity in seconds. Default: 31536000 (1 year)</td></tr>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>studentAddress</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Student's wallet address (0x...)</td>
+                    </tr>
+                    <tr>
+                        <td><code>subjectName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Subject name — must exist in DB</td>
+                    </tr>
+                    <tr>
+                        <td><code>credentialData</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>JSON string of credential info (studentName, grade, marks, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>validityPeriod</code></td>
+                        <td>Int</td>
+                        <td><span class="optional">Optional</span></td>
+                        <td>Validity in seconds. Default: 31536000 (1 year)</td>
+                    </tr>
                 </table>
                 <p class="response-title">Returns → CredentialTxResponse</p>
                 <table>
-                    <tr><th>Field</th><th>Type</th><th>Description</th></tr>
-                    <tr><td><code>success</code></td><td>Boolean</td><td>Whether the operation succeeded</td></tr>
-                    <tr><td><code>txHash</code></td><td>String</td><td>Blockchain transaction hash</td></tr>
-                    <tr><td><code>ipfsHash</code></td><td>String</td><td>IPFS hash where credential data is stored</td></tr>
-                    <tr><td><code>message</code></td><td>String</td><td>Human-readable status message</td></tr>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>success</code></td>
+                        <td>Boolean</td>
+                        <td>Whether the operation succeeded</td>
+                    </tr>
+                    <tr>
+                        <td><code>txHash</code></td>
+                        <td>String</td>
+                        <td>Blockchain transaction hash</td>
+                    </tr>
+                    <tr>
+                        <td><code>ipfsHash</code></td>
+                        <td>String</td>
+                        <td>IPFS hash where credential data is stored</td>
+                    </tr>
+                    <tr>
+                        <td><code>message</code></td>
+                        <td>String</td>
+                        <td>Human-readable status message</td>
+                    </tr>
                 </table>
             </div>
+
+            <!-- ===== NEW CONTRACT APIs (added below) ===== -->
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">updateComponentGrade</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Grade a single student's component — uploads grade data to IPFS, updates credential
+                    on blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation UpdateComponentGrade($input: UpdateComponentGradeInput!) {
+  updateComponentGrade(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentAddress": "0x...",
+#     "subjectName": "Mathematics",
+#     "componentName": "Midterm",
+#     "gradeData": "{\"marks\":85,\"grade\":\"A\",\"comments\":\"Excellent\"}"
+#   }
+# }</pre>
+                </div>
+                <p class="response-title">Input → UpdateComponentGradeInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>studentAddress</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Student's wallet address</td>
+                    </tr>
+                    <tr>
+                        <td><code>subjectName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Subject name</td>
+                    </tr>
+                    <tr>
+                        <td><code>componentName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Component name (Midterm, Final, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>gradeData</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>JSON string of grade data</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">removeComponent</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Remove a grading component from a subject. Deactivates on blockchain and in database.
+                </p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RemoveComponent($input: RemoveComponentInput!) {
+  removeComponent(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "subjectName": "Mathematics", "componentName": "Quiz1" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">batchUpdateComponentGrade</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Batch grade multiple students for a component in a single transaction.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation BatchUpdateComponentGrade($input: BatchUpdateComponentInput!) {
+  batchUpdateComponentGrade(input: $input) {
+    success
+    txHash
+    studentsProcessed
+    message
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentAddresses": ["0xABC...", "0xDEF..."],
+#     "subjectName": "Mathematics",
+#     "componentName": "Midterm",
+#     "gradeDataArray": [
+#       "{\"marks\":85,\"grade\":\"A\"}",
+#       "{\"marks\":72,\"grade\":\"B\"}"
+#     ]
+#   }
+# }</pre>
+                </div>
+                <p class="response-title">Input → BatchUpdateComponentInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>studentAddresses</code></td>
+                        <td>[String]</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Array of student wallet addresses</td>
+                    </tr>
+                    <tr>
+                        <td><code>subjectName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Subject name</td>
+                    </tr>
+                    <tr>
+                        <td><code>componentName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Component name</td>
+                    </tr>
+                    <tr>
+                        <td><code>gradeDataArray</code></td>
+                        <td>[String]</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Array of JSON strings, one per student</td>
+                    </tr>
+                </table>
+                <p class="response-title">Returns → BatchUpdateResponse</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>success</code></td>
+                        <td>Boolean</td>
+                        <td>Whether the batch operation succeeded</td>
+                    </tr>
+                    <tr>
+                        <td><code>txHash</code></td>
+                        <td>String</td>
+                        <td>Blockchain transaction hash</td>
+                    </tr>
+                    <tr>
+                        <td><code>studentsProcessed</code></td>
+                        <td>Int</td>
+                        <td>Number of students graded</td>
+                    </tr>
+                    <tr>
+                        <td><code>message</code></td>
+                        <td>String</td>
+                        <td>Status message</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">isValidComponent</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Check if a component is registered/valid for a subject on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query IsValidComponent($input: ComponentQueryInput!) {
+  isValidComponent(input: $input)
+}
+
+# Variables:
+# { "input": { "subjectName": "Mathematics", "componentName": "Midterm" } }
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyCredentialDetail</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">STUDENT</span>
+                </div>
+                <p class="op-desc">Get the current student's full credential detail for a specific subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyCredentialDetail($subject: String!) {
+  getMyCredentialDetail(subject: $subject) {
+    ipfsHash
+    version
+    totalComponents
+    createdAt
+    lastUpdatedAt
+    expiresAt
+    revoked
+    isExpired
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getStudentCredentialDetail</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">Get full credential details for a specific student in a subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetStudentCredentialDetail($input: StudentSubjectInput!) {
+  getStudentCredentialDetail(input: $input) {
+    ipfsHash
+    version
+    totalComponents
+    createdAt
+    lastUpdatedAt
+    expiresAt
+    revoked
+    isExpired
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getCredentialStats</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">Get credential completion stats — components graded vs total, with completion
+                    percentage.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetCredentialStats($input: StudentSubjectInput!) {
+  getCredentialStats(input: $input) {
+    exists
+    isValid
+    componentsGraded
+    totalComponentsInSubject
+    completionPercentage
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+                <p class="response-title">Returns → CredentialStatsResponse</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>exists</code></td>
+                        <td>Boolean</td>
+                        <td>Whether credential exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>isValid</code></td>
+                        <td>Boolean</td>
+                        <td>Not revoked and not expired</td>
+                    </tr>
+                    <tr>
+                        <td><code>componentsGraded</code></td>
+                        <td>Int</td>
+                        <td>Number of graded components</td>
+                    </tr>
+                    <tr>
+                        <td><code>totalComponentsInSubject</code></td>
+                        <td>Int</td>
+                        <td>Total registered components</td>
+                    </tr>
+                    <tr>
+                        <td><code>completionPercentage</code></td>
+                        <td>Int</td>
+                        <td>% completion (0-100)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyComponentHistory</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">STUDENT</span>
+                </div>
+                <p class="op-desc">Get the current student's grade history for a subject — all component updates.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyComponentHistory($subject: String!) {
+  getMyComponentHistory(subject: $subject) {
+    componentName
+    ipfsHash
+    updatedBy
+    timestamp
+    credentialVersion
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getStudentComponentHistory</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">View a student's complete grade history for a subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetStudentComponentHistory($input: StudentSubjectInput!) {
+  getStudentComponentHistory(input: $input) {
+    componentName
+    ipfsHash
+    updatedBy
+    timestamp
+    credentialVersion
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">isCredentialValid</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Check if a student's credential is valid (not revoked and not expired).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query IsCredentialValid($input: StudentSubjectInput!) {
+  isCredentialValid(input: $input)
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">subjectExistsOnChain</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Check if a subject is registered on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query SubjectExistsOnChain($subject: String!) {
+  subjectExistsOnChain(subject: $subject)
+}
+
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">hasTeacherSubject</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Check if a teacher has a specific subject assigned on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query HasTeacherSubject($teacherAddress: String!, $subject: String!) {
+  hasTeacherSubject(teacherAddress: $teacherAddress, subject: $subject)
+}
+
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getTeacherSubjectCount</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get the number of subjects assigned to a teacher on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetTeacherSubjectCount($teacherAddress: String!) {
+  getTeacherSubjectCount(teacherAddress: $teacherAddress)
+}
+
+# Returns: Int</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">registerDIDForUser</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Admin registers a DID on behalf of a user on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RegisterDIDForUser($input: RegisterDIDForUserInput!) {
+  registerDIDForUser(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "userAddress": "0x...", "did": "did:ethr:0x..." } }</pre>
+                </div>
+                <p class="response-title">Input → RegisterDIDForUserInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                    </tr>
+                    <tr>
+                        <td><code>userAddress</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>did</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">didToAddress</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Reverse lookup — convert a DID hash to its associated wallet address.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query DIDToAddress($didHash: String!) {
+  didToAddress(didHash: $didHash)
+}
+
+# Returns: String (wallet address)</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">renounceRole</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">User voluntarily gives up their own blockchain role.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RenounceRole($input: RenounceRoleInput!) {
+  renounceRole(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "role": "TEACHER_ROLE", "callerConfirmation": "0x...your_address" } }</pre>
+                </div>
+                <p class="response-title">Input → RenounceRoleInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>role</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>TEACHER_ROLE or STUDENT_ROLE</td>
+                    </tr>
+                    <tr>
+                        <td><code>callerConfirmation</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Caller's own wallet address (safety check)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getRoleAdmin</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get the admin role that controls a given role (role hierarchy).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetRoleAdmin($role: String!) {
+  getRoleAdmin(role: $role)
+}
+
+# role: "TEACHER_ROLE" | "STUDENT_ROLE" | "BACKEND_ROLE" | raw bytes32
+# Returns: String (bytes32 of admin role)</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">supportsInterface</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">ERC165 interface check — verify if the contract supports a given interface.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query SupportsInterface($interfaceId: String!) {
+  supportsInterface(interfaceId: $interfaceId)
+}
+
+# Returns: Boolean</pre>
+                </div>
+            </div>
         </div>
+
 
         <!-- ======================== ADMIN ======================== -->
         <div class="section" id="admin">
