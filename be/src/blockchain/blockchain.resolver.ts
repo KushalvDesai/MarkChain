@@ -13,7 +13,6 @@ import {
   CredentialData,
   BlockchainUserStatus,
   NetworkInfo,
-  IssueBlockchainCredentialInput,
   RevokeCredentialInput,
   AssignRoleInput,
   SubjectAssignmentInput,
@@ -28,6 +27,18 @@ import {
   ComponentWithTxResponse,
   CreateCredentialInput,
   CredentialTxResponse,
+  // New types
+  RemoveComponentInput,
+  BatchUpdateComponentInput,
+  ComponentQueryInput,
+  StudentSubjectInput,
+  RegisterDIDForUserInput,
+  UpdateComponentGradeInput,
+  RenounceRoleInput,
+  CredentialStatsResponse,
+  ComponentHistoryEntry,
+  CredentialDetailResponse,
+  BatchUpdateResponse,
 } from './blockchain.types';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -37,7 +48,7 @@ export class BlockchainResolver {
     private readonly blockchainService: BlockchainService,
     private readonly ipfsService: IPFSService,
     @Inject(UserService) private readonly userService: UserService,
-  ) {}
+  ) { }
 
   // Admin Operations
   @UseGuards(JwtAuthGuard)
@@ -79,8 +90,8 @@ export class BlockchainResolver {
       // Update user record
       await this.userService.updateBlockchainRole(input.userAddress, input.role);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         transactionHash: txHash,
         message: `${input.role} assigned successfully`
       };
@@ -115,8 +126,8 @@ export class BlockchainResolver {
       // Update user record
       await this.userService.addSubjectToTeacher(input.teacherAddress, input.subject);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         transactionHash: txHash,
         message: `Subject ${input.subject} assigned to teacher`
       };
@@ -151,8 +162,8 @@ export class BlockchainResolver {
       // Update user record
       await this.userService.removeSubjectFromTeacher(input.teacherAddress, input.subject);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         transactionHash: txHash,
         message: `Subject ${input.subject} removed from teacher`
       };
@@ -184,8 +195,8 @@ export class BlockchainResolver {
         input.subject,
       );
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         transactionHash: txHash,
         message: 'Credential revoked successfully'
       };
@@ -210,10 +221,10 @@ export class BlockchainResolver {
       console.log('Context.req.user exists:', !!context.req.user);
       console.log('Context.req.user:', context.req.user);
       console.log('Input:', input);
-      
+
       const userId = context.req.user.userId;
       console.log('Extracted userId:', userId);
-      
+
       await this.userService.linkWallet(userId, input.walletAddress);
 
       return {
@@ -236,7 +247,7 @@ export class BlockchainResolver {
   ): Promise<TransactionResponse> {
     try {
       const txHash = await this.blockchainService.registerDID(input.did);
-      
+
       // Update user record
       const userId = context.req.user.userId;
       await this.userService.updateDIDStatus(userId, input.did, true);
@@ -261,7 +272,7 @@ export class BlockchainResolver {
   ): Promise<BlockchainUserStatus> {
     try {
       const user = context.req.user;
-      
+
       // Get assigned subjects for teachers
       let assignedSubjects: string[] = [];
       if (user.role === 'TEACHER' && user.walletAddress) {
@@ -285,41 +296,41 @@ export class BlockchainResolver {
     }
   }
 
-  // Teacher Operations
+  // Teacher Operations — Grade a component for a single student
   @UseGuards(JwtAuthGuard)
   @Mutation(() => TransactionResponse)
-  async issueBlockchainCredential(
-    @Args('input') input: IssueBlockchainCredentialInput,
+  async updateComponentGrade(
+    @Args('input') input: UpdateComponentGradeInput,
     @Context() context,
   ): Promise<TransactionResponse> {
     try {
       const currentUser = context.req.user;
-      if (currentUser.role !== 'TEACHER') {
+      if (currentUser.role !== 'TEACHER' && currentUser.role !== 'ADMIN') {
         return {
           success: false,
-          error: 'Only teachers can issue credentials',
+          error: 'Only teachers and admins can grade components',
         };
       }
 
-      // Parse credential data
-      const credentialData = JSON.parse(input.credentialData as string);
-      credentialData.issuer = currentUser.walletAddress;
-      credentialData.issueDate = new Date().toISOString();
+      // Parse grade data & upload to IPFS
+      const gradeData = JSON.parse(input.gradeData);
+      gradeData.issuer = currentUser.walletAddress;
+      gradeData.issuerName = currentUser.name || currentUser.email;
+      gradeData.gradedAt = new Date().toISOString();
 
-      // Upload to IPFS
-      const ipfsHash = await this.ipfsService.uploadCredential(credentialData);
+      const ipfsHash = await this.ipfsService.uploadCredential(gradeData);
 
-      // Store on blockchain
-      const txHash = await this.blockchainService.issueOrUpdateCredential(
+      const txHash = await this.blockchainService.updateCredentialWithComponent(
         input.studentAddress,
-        input.subject,
+        input.subjectName,
+        input.componentName,
         ipfsHash,
       );
 
       return {
         success: true,
         transactionHash: txHash,
-        message: `Credential issued successfully. IPFS: ${ipfsHash}`,
+        message: `Component '${input.componentName}' graded. IPFS: ${ipfsHash}`,
       };
     } catch (error) {
       return {
@@ -346,38 +357,68 @@ export class BlockchainResolver {
     }
   }
 
-  // Student Operations
+  // Student Operations — get own credential detail
   @UseGuards(JwtAuthGuard)
-  @Query(() => BlockchainCredential, { nullable: true })
-  async getMySubjectCredential(
+  @Query(() => CredentialDetailResponse, { nullable: true })
+  async getMyCredentialDetail(
     @Args('subject') subject: string,
     @Context() context,
-  ): Promise<BlockchainCredential | null> {
+  ): Promise<CredentialDetailResponse | null> {
     try {
       const user = context.req.user;
-      if (!user.walletAddress) {
-        return null;
-      }
+      if (!user.walletAddress) return null;
 
-      const credential = await this.blockchainService.getStudentSubjectCredential(
+      const credential = await this.blockchainService.getStudentCredential(
         user.walletAddress,
         subject,
       );
-      
-      if (!credential || credential.ipfsHash === '') {
-        return null;
-      }
 
-      // Get full credential data from IPFS
-      const credentialData = await this.ipfsService.getCredential(credential.ipfsHash);
+      if (!credential || credential.ipfsHash === '') return null;
 
       return {
         ipfsHash: credential.ipfsHash,
-        issuer: credential.issuer,
-        updatedAt: credential.updatedAt.toString(),
-        subject: credentialData?.subject,
-        studentName: credentialData?.studentName,
-        grade: credentialData?.grade,
+        version: credential.version.toString(),
+        totalComponents: credential.totalComponents.toString(),
+        createdAt: credential.createdAt.toString(),
+        lastUpdatedAt: credential.lastUpdatedAt.toString(),
+        expiresAt: credential.expiresAt.toString(),
+        revoked: credential.revoked,
+        isExpired: credential.isExpired,
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Admin/Teacher — get student credential detail
+  @UseGuards(JwtAuthGuard)
+  @Query(() => CredentialDetailResponse, { nullable: true })
+  async getStudentCredentialDetail(
+    @Args('input') input: StudentSubjectInput,
+    @Context() context,
+  ): Promise<CredentialDetailResponse | null> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN' && currentUser.role !== 'TEACHER') {
+        return null;
+      }
+
+      const credential = await this.blockchainService.getStudentCredential(
+        input.studentAddress,
+        input.subject,
+      );
+
+      if (!credential || credential.ipfsHash === '') return null;
+
+      return {
+        ipfsHash: credential.ipfsHash,
+        version: credential.version.toString(),
+        totalComponents: credential.totalComponents.toString(),
+        createdAt: credential.createdAt.toString(),
+        lastUpdatedAt: credential.lastUpdatedAt.toString(),
+        expiresAt: credential.expiresAt.toString(),
+        revoked: credential.revoked,
+        isExpired: credential.isExpired,
       };
     } catch (error) {
       return null;
@@ -394,40 +435,34 @@ export class BlockchainResolver {
       if (!user.walletAddress) {
         return [];
       }
-
-      // This would need to be implemented to get all credentials for a student
-      // For now, return empty array
       return [];
     } catch (error) {
       return [];
     }
   }
 
-  // Public Verification
-  @Query(() => BlockchainCredential, { nullable: true })
+  // Public Verification — now using getStudentCredential
+  @Query(() => CredentialDetailResponse, { nullable: true })
   async verifyBlockchainCredential(
     @Args('input') input: VerifyCredentialInput,
-  ): Promise<BlockchainCredential | null> {
+  ): Promise<CredentialDetailResponse | null> {
     try {
-      const credential = await this.blockchainService.getStudentSubjectCredential(
+      const credential = await this.blockchainService.getStudentCredential(
         input.studentAddress,
         input.subject,
       );
-      
-      if (!credential || credential.ipfsHash === '') {
-        return null;
-      }
 
-      // Get full credential data from IPFS
-      const credentialData = await this.ipfsService.getCredential(credential.ipfsHash);
+      if (!credential || credential.ipfsHash === '') return null;
 
       return {
         ipfsHash: credential.ipfsHash,
-        issuer: credential.issuer,
-        updatedAt: credential.updatedAt.toString(),
-        subject: credentialData?.subject,
-        studentName: credentialData?.studentName,
-        grade: credentialData?.grade,
+        version: credential.version.toString(),
+        totalComponents: credential.totalComponents.toString(),
+        createdAt: credential.createdAt.toString(),
+        lastUpdatedAt: credential.lastUpdatedAt.toString(),
+        expiresAt: credential.expiresAt.toString(),
+        revoked: credential.revoked,
+        isExpired: credential.isExpired,
       };
     } catch (error) {
       return null;
@@ -475,7 +510,7 @@ export class BlockchainResolver {
   ): Promise<any> {
     try {
       const currentUser = context.req?.user;
-      
+
       // Only check admin role if auth is enabled
       if (currentUser && currentUser.role !== 'ADMIN') {
         throw new Error('Only admins can create subjects');
@@ -574,6 +609,343 @@ export class BlockchainResolver {
 
     } catch (error) {
       throw new Error(`createNewCredential failed: ${error.message}`);
+    }
+  }
+
+  // ==================== NEW RESOLVERS ====================
+
+  // --- Component Management ---
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => TransactionResponse)
+  async removeComponent(
+    @Args('input') input: RemoveComponentInput,
+    @Context() context,
+  ): Promise<TransactionResponse> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN') {
+        return { success: false, error: 'Only admins can remove components' };
+      }
+
+      const txHash = await this.blockchainService.removeComponent(
+        input.subjectName,
+        input.componentName,
+      );
+
+      return {
+        success: true,
+        transactionHash: txHash,
+        message: `Component '${input.componentName}' removed from '${input.subjectName}'`,
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => BatchUpdateResponse)
+  async batchUpdateComponentGrade(
+    @Args('input') input: BatchUpdateComponentInput,
+    @Context() context,
+  ): Promise<BatchUpdateResponse> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'TEACHER' && currentUser.role !== 'ADMIN') {
+        throw new Error('Only teachers and admins can batch grade');
+      }
+
+      // Upload each student's grade data to IPFS
+      const ipfsHashes: string[] = [];
+      for (const gradeDataStr of input.gradeDataArray) {
+        const gradeData = JSON.parse(gradeDataStr);
+        gradeData.issuer = currentUser.walletAddress;
+        gradeData.gradedAt = new Date().toISOString();
+        const hash = await this.ipfsService.uploadCredential(gradeData);
+        ipfsHashes.push(hash);
+      }
+
+      const txHash = await this.blockchainService.batchUpdateComponent(
+        input.studentAddresses,
+        input.subjectName,
+        input.componentName,
+        ipfsHashes,
+      );
+
+      return {
+        success: true,
+        txHash,
+        studentsProcessed: input.studentAddresses.length,
+        message: `Batch graded ${input.studentAddresses.length} students`,
+      };
+    } catch (error) {
+      throw new Error(`Batch update failed: ${error.message}`);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Boolean)
+  async isValidComponent(
+    @Args('input') input: ComponentQueryInput,
+  ): Promise<boolean> {
+    try {
+      return await this.blockchainService.isValidComponent(
+        input.subjectName,
+        input.componentName,
+      );
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // --- Credential Stats & History ---
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => CredentialStatsResponse)
+  async getCredentialStats(
+    @Args('input') input: StudentSubjectInput,
+    @Context() context,
+  ): Promise<CredentialStatsResponse> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN' && currentUser.role !== 'TEACHER') {
+        throw new Error('Only admins and teachers can view credential stats');
+      }
+
+      return await this.blockchainService.getCredentialStats(
+        input.studentAddress,
+        input.subject,
+      );
+    } catch (error) {
+      throw new Error(`Failed to get credential stats: ${error.message}`);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => [ComponentHistoryEntry])
+  async getMyComponentHistory(
+    @Args('subject') subject: string,
+    @Context() context,
+  ): Promise<ComponentHistoryEntry[]> {
+    try {
+      const user = context.req.user;
+      if (!user.walletAddress) return [];
+
+      // Use getStudentComponentHistory with the user's own address
+      return await this.blockchainService.getStudentComponentHistory(
+        user.walletAddress,
+        subject,
+      );
+    } catch (error) {
+      return [];
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => [ComponentHistoryEntry])
+  async getStudentComponentHistory(
+    @Args('input') input: StudentSubjectInput,
+    @Context() context,
+  ): Promise<ComponentHistoryEntry[]> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN' && currentUser.role !== 'TEACHER') {
+        throw new Error('Only admins and teachers can view student history');
+      }
+
+      return await this.blockchainService.getStudentComponentHistory(
+        input.studentAddress,
+        input.subject,
+      );
+    } catch (error) {
+      return [];
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Boolean)
+  async isCredentialValid(
+    @Args('input') input: StudentSubjectInput,
+  ): Promise<boolean> {
+    try {
+      return await this.blockchainService.isCredentialValid(
+        input.studentAddress,
+        input.subject,
+      );
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // --- Subject Management ---
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Boolean)
+  async subjectExistsOnChain(
+    @Args('subject') subject: string,
+  ): Promise<boolean> {
+    try {
+      return await this.blockchainService.subjectExistsOnChain(subject);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Boolean)
+  async hasTeacherSubject(
+    @Args('teacherAddress') teacherAddress: string,
+    @Args('subject') subject: string,
+    @Context() context,
+  ): Promise<boolean> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN') {
+        return false;
+      }
+      return await this.blockchainService.hasSubject(teacherAddress, subject);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Number)
+  async getTeacherSubjectCount(
+    @Args('teacherAddress') teacherAddress: string,
+    @Context() context,
+  ): Promise<number> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN') {
+        throw new Error('Only admins can view teacher subject counts');
+      }
+      return await this.blockchainService.getTeacherSubjectCount(teacherAddress);
+    } catch (error) {
+      throw new Error(`Failed to get teacher subject count: ${error.message}`);
+    }
+  }
+
+  // --- DID Management ---
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => TransactionResponse)
+  async registerDIDForUser(
+    @Args('input') input: RegisterDIDForUserInput,
+    @Context() context,
+  ): Promise<TransactionResponse> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN') {
+        return { success: false, error: 'Only admins can register DID for users' };
+      }
+
+      const txHash = await this.blockchainService.registerDIDForUser(
+        input.userAddress,
+        input.did,
+      );
+
+      // Update user record
+      await this.userService.updateDIDStatus(input.userAddress, input.did, true);
+
+      return {
+        success: true,
+        transactionHash: txHash,
+        message: `DID registered for user ${input.userAddress}`,
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => String)
+  async didToAddress(
+    @Args('didHash') didHash: string,
+  ): Promise<string> {
+    try {
+      return await this.blockchainService.didToAddress(didHash);
+    } catch (error) {
+      throw new Error(`Failed to resolve DID: ${error.message}`);
+    }
+  }
+
+  // --- Role Management ---
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => TransactionResponse)
+  async renounceRole(
+    @Args('input') input: RenounceRoleInput,
+    @Context() context,
+  ): Promise<TransactionResponse> {
+    try {
+      const currentUser = context.req.user;
+      const roles = this.blockchainService.getRoleConstants();
+
+      let roleConstant: string;
+      if (input.role === 'TEACHER_ROLE') {
+        roleConstant = roles.TEACHER_ROLE;
+      } else if (input.role === 'STUDENT_ROLE') {
+        roleConstant = roles.STUDENT_ROLE;
+      } else {
+        return { success: false, error: 'Invalid role. Use TEACHER_ROLE or STUDENT_ROLE' };
+      }
+
+      const txHash = await this.blockchainService.renounceRole(
+        roleConstant,
+        input.callerConfirmation,
+      );
+
+      return {
+        success: true,
+        transactionHash: txHash,
+        message: `Role ${input.role} renounced successfully`,
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => String)
+  async getRoleAdmin(
+    @Args('role') role: string,
+    @Context() context,
+  ): Promise<string> {
+    try {
+      const currentUser = context.req.user;
+      if (currentUser.role !== 'ADMIN') {
+        throw new Error('Only admins can query role admins');
+      }
+
+      const roles = this.blockchainService.getRoleConstants();
+      let roleConstant: string;
+      if (role === 'TEACHER_ROLE') {
+        roleConstant = roles.TEACHER_ROLE;
+      } else if (role === 'STUDENT_ROLE') {
+        roleConstant = roles.STUDENT_ROLE;
+      } else if (role === 'BACKEND_ROLE') {
+        roleConstant = roles.BACKEND_ROLE;
+      } else {
+        roleConstant = role; // Allow passing raw bytes32
+      }
+
+      return await this.blockchainService.getRoleAdmin(roleConstant);
+    } catch (error) {
+      throw new Error(`Failed to get role admin: ${error.message}`);
+    }
+  }
+
+  // --- Utility ---
+
+  @Query(() => Boolean)
+  async supportsInterface(
+    @Args('interfaceId') interfaceId: string,
+  ): Promise<boolean> {
+    try {
+      return await this.blockchainService.supportsInterface(interfaceId);
+    } catch (error) {
+      return false;
     }
   }
 

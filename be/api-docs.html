@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkChain — GraphQL API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f7fa;
+            color: #1e293b;
+            line-height: 1.6
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 32px;
+            font-size: 14px
+        }
+
+        nav {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .06)
+        }
+
+        nav h2 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #334155
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        nav a {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #f1f5f9;
+            color: #3b82f6;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: .2s
+        }
+
+        nav a:hover {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .section {
+            margin-bottom: 40px
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            padding-top: 16px
+        }
+
+        .section-desc {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 16px
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+            border-left: 4px solid #3b82f6
+        }
+
+        .card.mutation {
+            border-left-color: #8b5cf6
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            flex-wrap: wrap
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .badge-query {
+            background: #dbeafe;
+            color: #2563eb
+        }
+
+        .badge-mutation {
+            background: #ede9fe;
+            color: #7c3aed
+        }
+
+        .badge-auth {
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 10px
+        }
+
+        .badge-role {
+            background: #dcfce7;
+            color: #166534;
+            font-size: 10px
+        }
+
+        .badge-public {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 10px
+        }
+
+        .op-name {
+            font-size: 17px;
+            font-weight: 600
+        }
+
+        .op-desc {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 12px
+        }
+
+        .code-wrap {
+            position: relative;
+            margin-bottom: 8px
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #334155;
+            color: #94a3b8;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: .2s
+        }
+
+        .copy-btn:hover {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+            color: #fff
+        }
+
+        .response-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin: 12px 0 4px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 8px
+        }
+
+        th {
+            text-align: left;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        td code {
+            background: #f1f5f9;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 12px
+        }
+
+        .required {
+            color: #ef4444;
+            font-weight: 700
+        }
+
+        .optional {
+            color: #94a3b8
+        }
+
+        footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            padding: 32px 0 16px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📋 MarkChain GraphQL API Documentation</h1>
+        <p class="subtitle">Auto-generated from backend resolvers &amp; schema.gql • Last updated: Feb 2026</p>
+
+        <nav>
+            <h2>Modules</h2>
+            <ul>
+                <li><a href="#auth">🔐 Auth</a></li>
+                <li><a href="#user">👤 User</a></li>
+                <li><a href="#blockchain">⛓️ Blockchain</a></li>
+                <li><a href="#admin">🛡️ Admin</a></li>
+                <li><a href="#teacher">🎓 Teacher</a></li>
+                <li><a href="#notification">🔔 Notification</a></li>
+                <li><a href="#utility">🔧 Utility</a></li>
+            </ul>
+        </nav>
+
+        <!-- ======================== AUTH ======================== -->
+        <div class="section" id="auth">
+            <h2 class="section-title">🔐 Auth Module</h2>
+            <p class="section-desc">Wallet-based authentication using nonce + signature verification. Returns JWT token.
+            </p>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">generateNonce</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">Generate a nonce for wallet signature verification. First step of login flow.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation GenerateNonce($walletAddress: String!) {
+  generateNonce(walletAddress: $walletAddress) {
+    nonce
+    message
+  }
+}</pre>
+                </div>
+                <p class="response-title">Variables</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                    </tr>
+                    <tr>
+                        <td><code>walletAddress</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                </table>
+                <p class="response-title">Returns → NonceResponse</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                    </tr>
+                    <tr>
+                        <td><code>nonce</code></td>
+                        <td>String!</td>
+                    </tr>
+                    <tr>
+                        <td><code>message</code></td>
+                        <td>String!</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">verifySignature</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">Verify wallet signature with nonce. Returns JWT access token + user info.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation VerifySignature($input: VerifySignatureInput!) {
+  verifySignature(input: $input) {
+    accessToken
+    user {
+      walletAddress
+      did
+      role
+      name
+      email
+    }
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "walletAddress": "0x...",
+#     "signature": "0x...",
+#     "nonce": "abc123"
+#   }
+# }</pre>
+                </div>
+                <p class="response-title">Input → VerifySignatureInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                    </tr>
+                    <tr>
+                        <td><code>walletAddress</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>signature</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>nonce</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">me</span>
+                    <span class="badge badge-auth">🔒 Auth Required</span>
+                </div>
+                <p class="op-desc">Returns greeting with current user's wallet address and DID. Use to verify token
+                    validity.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query Me {
+  me
+}
+
+# Headers: { "Authorization": "Bearer &lt;JWT_TOKEN&gt;" }</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== USER ======================== -->
+        <div class="section" id="user">
+            <h2 class="section-title">👤 User Module</h2>
+            <p class="section-desc">User profile management, OTP verification for students, email OTP for
+                teachers/admins.</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getUsersByRole</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get all users filtered by role.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetUsersByRole($role: UserRole!) {
+  getUsersByRole(role: $role) {
+    _id
+    walletAddress
+    did
+    role
+    name
+    studentId
+    isActive
+    lastLogin
+    createdAt
+    updatedAt
+    isVerified
+  }
+}
+
+# UserRole enum: STUDENT | TEACHER | ADMIN</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getUserProfile</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get a user's profile by wallet address.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetUserProfile($walletAddress: String!) {
+  getUserProfile(walletAddress: $walletAddress) {
+    _id
+    walletAddress
+    did
+    role
+    name
+    studentId
+    isActive
+    lastLogin
+    createdAt
+    updatedAt
+    isVerified
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getAllUsers</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get all users in the system.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetAllUsers {
+  getAllUsers {
+    _id
+    walletAddress
+    did
+    role
+    name
+    studentId
+    isActive
+    lastLogin
+    createdAt
+    updatedAt
+    isVerified
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">updateUserProfile</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Update the current user's name and/or studentId.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation UpdateUserProfile($input: UpdateUserProfileDto!) {
+  updateUserProfile(input: $input) {
+    _id
+    walletAddress
+    name
+    studentId
+    role
+    isVerified
+  }
+}
+
+# Variables:
+# { "input": { "name": "John", "studentId": "STU001" } }</pre>
+                </div>
+                <p class="response-title">Input → UpdateUserProfileDto</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                    </tr>
+                    <tr>
+                        <td><code>name</code></td>
+                        <td>String</td>
+                        <td class="optional">No</td>
+                    </tr>
+                    <tr>
+                        <td><code>studentId</code></td>
+                        <td>String</td>
+                        <td class="optional">No</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">sendOTPForVerification</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Send OTP to student's institute email for identity verification.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation SendOTPForVerification($input: SendOTPDto!) {
+  sendOTPForVerification(input: $input) {
+    success
+    message
+    email
+  }
+}
+
+# Variables: { "input": { "studentId": "STU001" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">verifyOTPAndUpdateProfile</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Verify OTP and update student profile with name &amp; studentId.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation VerifyOTPAndUpdateProfile($input: VerifyOTPDto!) {
+  verifyOTPAndUpdateProfile(input: $input) {
+    success
+    message
+    user { _id walletAddress name studentId role isVerified }
+  }
+}
+
+# Variables:
+# { "input": { "otp": "123456", "name": "John", "studentId": "STU001" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">sendEmailOTPForProfile</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Send OTP to an email for teacher/admin profile verification.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation SendEmailOTPForProfile($input: SendEmailOTPDto!) {
+  sendEmailOTPForProfile(input: $input) {
+    success
+    message
+    email
+  }
+}
+
+# Variables: { "input": { "email": "teacher@univ.edu", "name": "Dr. Smith" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">verifyEmailOTPAndUpdateProfile</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Verify email OTP and update teacher/admin profile.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation VerifyEmailOTPAndUpdateProfile($input: VerifyEmailOTPDto!) {
+  verifyEmailOTPAndUpdateProfile(input: $input) {
+    success
+    message
+    user { _id walletAddress name role isVerified }
+  }
+}
+
+# Variables:
+# { "input": { "email": "a@b.com", "otp": "123456", "name": "Dr. X" } }</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== BLOCKCHAIN ======================== -->
+        <div class="section" id="blockchain">
+            <h2 class="section-title">⛓️ Blockchain Module</h2>
+            <p class="section-desc">Direct blockchain interactions — DID registration, credential issuance, role
+                management, IPFS, subjects &amp; components.</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyBlockchainStatus</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get blockchain status of the currently logged-in user.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyBlockchainStatus {
+  getMyBlockchainStatus {
+    walletAddress
+    didHash
+    blockchainRole
+    didRegistered
+    hasBlockchainRole
+    assignedSubjects
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyAssignedSubjects</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get subjects assigned to the current teacher (returns [] for non-teachers).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyAssignedSubjects {
+  getMyAssignedSubjects
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMySubjectCredential</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get a student's credential for a specific subject from the blockchain + IPFS.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMySubjectCredential($subject: String!) {
+  getMySubjectCredential(subject: $subject) {
+    ipfsHash
+    issuer
+    updatedAt
+    studentName
+    subject
+    grade
+    blockchainTxHash
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyBlockchainCredentials</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get all blockchain credentials for the current student.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyBlockchainCredentials {
+  getMyBlockchainCredentials {
+    ipfsHash
+    issuer
+    updatedAt
+    studentName
+    subject
+    grade
+    blockchainTxHash
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">verifyBlockchainCredential</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">Publicly verify a student's credential by wallet address + subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query VerifyBlockchainCredential($input: VerifyCredentialInput!) {
+  verifyBlockchainCredential(input: $input) {
+    ipfsHash
+    issuer
+    updatedAt
+    studentName
+    subject
+    grade
+    blockchainTxHash
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Math" } }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getBlockchainNetworkInfo</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">Get blockchain network connection info (contract address, chain ID, etc).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetBlockchainNetworkInfo {
+  getBlockchainNetworkInfo {
+    contractAddress
+    walletAddress
+    network
+    chainId
+    isConnected
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">testIPFSConnection</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Test IPFS service connectivity. Returns true/false.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query TestIPFSConnection {
+  testIPFSConnection
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getAllSubjects</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get all registered subjects from the database.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetAllSubjects {
+  getAllSubjects {
+    _id
+    subjectName
+    blockchainHash
+    isActive
+    createdBy
+    description
+    credits
+    createdAt
+    updatedAt
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getSubjectComponents</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get all components for a specific subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetSubjectComponents($subjectName: String!) {
+  getSubjectComponents(subjectName: $subjectName) {
+    _id
+    componentName
+    subjectName
+    blockchainHash
+    isActive
+    createdBy
+    weightage
+    maxMarks
+    createdAt
+    updatedAt
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">linkWalletAddress</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Link a wallet address to the authenticated user.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation LinkWalletAddress($input: LinkWalletInput!) {
+  linkWalletAddress(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables: { "input": { "walletAddress": "0x..." } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">registerUserDID</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Register a DID on the blockchain for the authenticated user.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RegisterUserDID($input: RegisterDIDInput!) {
+  registerUserDID(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables: { "input": { "did": "did:markchain:0x..." } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">assignBlockchainRole</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Assign a blockchain role (TEACHER_ROLE / STUDENT_ROLE) to a user.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation AssignBlockchainRole($input: AssignBlockchainRoleInput!) {
+  assignBlockchainRole(input: $input) {
+    success
+    message
+    txHash
+  }
+}
+
+# Variables:
+# { "input": { "userWalletAddress": "0x...", "role": "TEACHER_ROLE" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">assignSubjectToTeacher</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Assign a subject to a teacher on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation AssignSubjectToTeacher($input: SubjectAssignmentInput!) {
+  assignSubjectToTeacher(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "teacherAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">removeSubjectFromTeacher</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Remove a subject assignment from a teacher on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RemoveSubjectFromTeacher($input: SubjectAssignmentInput!) {
+  removeSubjectFromTeacher(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "teacherAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">revokeBlockchainCredential</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Revoke a credential from the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RevokeBlockchainCredential($input: RevokeCredentialInput!) {
+  revokeBlockchainCredential(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Math" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">issueBlockchainCredential</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER</span>
+                </div>
+                <p class="op-desc">Issue a credential to a student — uploads data to IPFS, stores hash on blockchain.
+                </p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation IssueBlockchainCredential($input: IssueBlockchainCredentialInput!) {
+  issueBlockchainCredential(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentAddress": "0x...",
+#     "subject": "Math",
+#     "credentialData": "{\"studentName\":\"John\",\"grade\":\"A\"}"
+#   }
+# }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">createSubject</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Create a new subject (after user pays gas via MetaMask).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation CreateSubject($input: CreateSubjectInput!) {
+  createSubject(input: $input) {
+    txHash
+    success
+    subject {
+      _id
+      subjectName
+      blockchainHash
+      isActive
+      description
+      credits
+      createdAt
+    }
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "subjectName": "Mathematics",
+#     "description": "Core math",
+#     "credits": 4,
+#     "transactionHash": "0x..."
+#   }
+# }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">registerComponent</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Register a grading component (e.g., midterm, final) under a subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RegisterComponent($input: RegisterComponentInput!) {
+  registerComponent(input: $input) {
+    txHash
+    success
+    component {
+      _id
+      componentName
+      subjectName
+      blockchainHash
+      isActive
+      weightage
+      maxMarks
+    }
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "subjectName": "Mathematics",
+#     "componentName": "Midterm",
+#     "weightage": 30,
+#     "maxMarks": 100
+#   }
+# }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">createNewCredential</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Create an initial blockchain credential for a student in a subject. Uploads
+                    credential data to IPFS, then anchors the hash on-chain. Subject must already exist. Student must
+                    have a registered DID on-chain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation CreateNewCredential($input: CreateCredentialInput!) {
+  createNewCredential(input: $input) {
+    success
+    txHash
+    ipfsHash
+    message
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentAddress": "0x...",
+#     "subjectName": "Mathematics",
+#     "credentialData": "{\"studentName\":\"John Doe\",\"studentId\":\"STU001\",\"grade\":\"A\",\"marks\":92}",
+#     "validityPeriod": 31536000
+#   }
+# }</pre>
+                </div>
+                <p class="response-title">Input → CreateCredentialInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>studentAddress</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Student's wallet address (0x...)</td>
+                    </tr>
+                    <tr>
+                        <td><code>subjectName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Subject name — must exist in DB</td>
+                    </tr>
+                    <tr>
+                        <td><code>credentialData</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>JSON string of credential info (studentName, grade, marks, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>validityPeriod</code></td>
+                        <td>Int</td>
+                        <td><span class="optional">Optional</span></td>
+                        <td>Validity in seconds. Default: 31536000 (1 year)</td>
+                    </tr>
+                </table>
+                <p class="response-title">Returns → CredentialTxResponse</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>success</code></td>
+                        <td>Boolean</td>
+                        <td>Whether the operation succeeded</td>
+                    </tr>
+                    <tr>
+                        <td><code>txHash</code></td>
+                        <td>String</td>
+                        <td>Blockchain transaction hash</td>
+                    </tr>
+                    <tr>
+                        <td><code>ipfsHash</code></td>
+                        <td>String</td>
+                        <td>IPFS hash where credential data is stored</td>
+                    </tr>
+                    <tr>
+                        <td><code>message</code></td>
+                        <td>String</td>
+                        <td>Human-readable status message</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ===== NEW CONTRACT APIs (added below) ===== -->
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">updateComponentGrade</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Grade a single student's component — uploads grade data to IPFS, updates credential
+                    on blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation UpdateComponentGrade($input: UpdateComponentGradeInput!) {
+  updateComponentGrade(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentAddress": "0x...",
+#     "subjectName": "Mathematics",
+#     "componentName": "Midterm",
+#     "gradeData": "{\"marks\":85,\"grade\":\"A\",\"comments\":\"Excellent\"}"
+#   }
+# }</pre>
+                </div>
+                <p class="response-title">Input → UpdateComponentGradeInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>studentAddress</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Student's wallet address</td>
+                    </tr>
+                    <tr>
+                        <td><code>subjectName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Subject name</td>
+                    </tr>
+                    <tr>
+                        <td><code>componentName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Component name (Midterm, Final, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>gradeData</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>JSON string of grade data</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">removeComponent</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Remove a grading component from a subject. Deactivates on blockchain and in database.
+                </p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RemoveComponent($input: RemoveComponentInput!) {
+  removeComponent(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "subjectName": "Mathematics", "componentName": "Quiz1" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">batchUpdateComponentGrade</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER / ADMIN</span>
+                </div>
+                <p class="op-desc">Batch grade multiple students for a component in a single transaction.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation BatchUpdateComponentGrade($input: BatchUpdateComponentInput!) {
+  batchUpdateComponentGrade(input: $input) {
+    success
+    txHash
+    studentsProcessed
+    message
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentAddresses": ["0xABC...", "0xDEF..."],
+#     "subjectName": "Mathematics",
+#     "componentName": "Midterm",
+#     "gradeDataArray": [
+#       "{\"marks\":85,\"grade\":\"A\"}",
+#       "{\"marks\":72,\"grade\":\"B\"}"
+#     ]
+#   }
+# }</pre>
+                </div>
+                <p class="response-title">Input → BatchUpdateComponentInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>studentAddresses</code></td>
+                        <td>[String]</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Array of student wallet addresses</td>
+                    </tr>
+                    <tr>
+                        <td><code>subjectName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Subject name</td>
+                    </tr>
+                    <tr>
+                        <td><code>componentName</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Component name</td>
+                    </tr>
+                    <tr>
+                        <td><code>gradeDataArray</code></td>
+                        <td>[String]</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Array of JSON strings, one per student</td>
+                    </tr>
+                </table>
+                <p class="response-title">Returns → BatchUpdateResponse</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>success</code></td>
+                        <td>Boolean</td>
+                        <td>Whether the batch operation succeeded</td>
+                    </tr>
+                    <tr>
+                        <td><code>txHash</code></td>
+                        <td>String</td>
+                        <td>Blockchain transaction hash</td>
+                    </tr>
+                    <tr>
+                        <td><code>studentsProcessed</code></td>
+                        <td>Int</td>
+                        <td>Number of students graded</td>
+                    </tr>
+                    <tr>
+                        <td><code>message</code></td>
+                        <td>String</td>
+                        <td>Status message</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">isValidComponent</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Check if a component is registered/valid for a subject on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query IsValidComponent($input: ComponentQueryInput!) {
+  isValidComponent(input: $input)
+}
+
+# Variables:
+# { "input": { "subjectName": "Mathematics", "componentName": "Midterm" } }
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyCredentialDetail</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">STUDENT</span>
+                </div>
+                <p class="op-desc">Get the current student's full credential detail for a specific subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyCredentialDetail($subject: String!) {
+  getMyCredentialDetail(subject: $subject) {
+    ipfsHash
+    version
+    totalComponents
+    createdAt
+    lastUpdatedAt
+    expiresAt
+    revoked
+    isExpired
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getStudentCredentialDetail</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">Get full credential details for a specific student in a subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetStudentCredentialDetail($input: StudentSubjectInput!) {
+  getStudentCredentialDetail(input: $input) {
+    ipfsHash
+    version
+    totalComponents
+    createdAt
+    lastUpdatedAt
+    expiresAt
+    revoked
+    isExpired
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getCredentialStats</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">Get credential completion stats — components graded vs total, with completion
+                    percentage.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetCredentialStats($input: StudentSubjectInput!) {
+  getCredentialStats(input: $input) {
+    exists
+    isValid
+    componentsGraded
+    totalComponentsInSubject
+    completionPercentage
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+                <p class="response-title">Returns → CredentialStatsResponse</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>exists</code></td>
+                        <td>Boolean</td>
+                        <td>Whether credential exists</td>
+                    </tr>
+                    <tr>
+                        <td><code>isValid</code></td>
+                        <td>Boolean</td>
+                        <td>Not revoked and not expired</td>
+                    </tr>
+                    <tr>
+                        <td><code>componentsGraded</code></td>
+                        <td>Int</td>
+                        <td>Number of graded components</td>
+                    </tr>
+                    <tr>
+                        <td><code>totalComponentsInSubject</code></td>
+                        <td>Int</td>
+                        <td>Total registered components</td>
+                    </tr>
+                    <tr>
+                        <td><code>completionPercentage</code></td>
+                        <td>Int</td>
+                        <td>% completion (0-100)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyComponentHistory</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">STUDENT</span>
+                </div>
+                <p class="op-desc">Get the current student's grade history for a subject — all component updates.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyComponentHistory($subject: String!) {
+  getMyComponentHistory(subject: $subject) {
+    componentName
+    ipfsHash
+    updatedBy
+    timestamp
+    credentialVersion
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getStudentComponentHistory</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">View a student's complete grade history for a subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetStudentComponentHistory($input: StudentSubjectInput!) {
+  getStudentComponentHistory(input: $input) {
+    componentName
+    ipfsHash
+    updatedBy
+    timestamp
+    credentialVersion
+  }
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">isCredentialValid</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Check if a student's credential is valid (not revoked and not expired).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query IsCredentialValid($input: StudentSubjectInput!) {
+  isCredentialValid(input: $input)
+}
+
+# Variables:
+# { "input": { "studentAddress": "0x...", "subject": "Mathematics" } }
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">subjectExistsOnChain</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Check if a subject is registered on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query SubjectExistsOnChain($subject: String!) {
+  subjectExistsOnChain(subject: $subject)
+}
+
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">hasTeacherSubject</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Check if a teacher has a specific subject assigned on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query HasTeacherSubject($teacherAddress: String!, $subject: String!) {
+  hasTeacherSubject(teacherAddress: $teacherAddress, subject: $subject)
+}
+
+# Returns: Boolean</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getTeacherSubjectCount</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get the number of subjects assigned to a teacher on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetTeacherSubjectCount($teacherAddress: String!) {
+  getTeacherSubjectCount(teacherAddress: $teacherAddress)
+}
+
+# Returns: Int</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">registerDIDForUser</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Admin registers a DID on behalf of a user on the blockchain.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RegisterDIDForUser($input: RegisterDIDForUserInput!) {
+  registerDIDForUser(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "userAddress": "0x...", "did": "did:ethr:0x..." } }</pre>
+                </div>
+                <p class="response-title">Input → RegisterDIDForUserInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                    </tr>
+                    <tr>
+                        <td><code>userAddress</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>did</code></td>
+                        <td>String</td>
+                        <td class="required">Yes</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">didToAddress</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Reverse lookup — convert a DID hash to its associated wallet address.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query DIDToAddress($didHash: String!) {
+  didToAddress(didHash: $didHash)
+}
+
+# Returns: String (wallet address)</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">renounceRole</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">User voluntarily gives up their own blockchain role.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RenounceRole($input: RenounceRoleInput!) {
+  renounceRole(input: $input) {
+    success
+    transactionHash
+    message
+    error
+  }
+}
+
+# Variables:
+# { "input": { "role": "TEACHER_ROLE", "callerConfirmation": "0x...your_address" } }</pre>
+                </div>
+                <p class="response-title">Input → RenounceRoleInput</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>role</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>TEACHER_ROLE or STUDENT_ROLE</td>
+                    </tr>
+                    <tr>
+                        <td><code>callerConfirmation</code></td>
+                        <td>String</td>
+                        <td><span class="required">Required</span></td>
+                        <td>Caller's own wallet address (safety check)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getRoleAdmin</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get the admin role that controls a given role (role hierarchy).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetRoleAdmin($role: String!) {
+  getRoleAdmin(role: $role)
+}
+
+# role: "TEACHER_ROLE" | "STUDENT_ROLE" | "BACKEND_ROLE" | raw bytes32
+# Returns: String (bytes32 of admin role)</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">supportsInterface</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">ERC165 interface check — verify if the contract supports a given interface.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query SupportsInterface($interfaceId: String!) {
+  supportsInterface(interfaceId: $interfaceId)
+}
+
+# Returns: Boolean</pre>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ======================== ADMIN ======================== -->
+        <div class="section" id="admin">
+            <h2 class="section-title">🛡️ Admin Module</h2>
+            <p class="section-desc">Admin-only operations: teacher-subject assignments, exam schedules, credential
+                revocation, student batch queries.</p>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">createTeacherSubject</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Assign a subject to a teacher with batch and academic info.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation CreateTeacherSubject($input: CreateTeacherSubjectInput!) {
+  createTeacherSubject(input: $input) {
+    _id
+    teacherDID
+    teacherWalletAddress
+    teacherName
+    subjectCode
+    subjectName
+    academicYear
+    semester
+    batches
+    department
+    isActive
+    assignedBy
+    assignedAt
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "teacherWalletAddress": "0x...",
+#     "subjectCode": "MATH101",
+#     "subjectName": "Mathematics",
+#     "academicYear": "2025-26",
+#     "semester": "5",
+#     "batches": ["A", "B"],
+#     "department": "CS"
+#   }
+# }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getAllTeacherSubjects</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Get all teacher-subject assignments.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetAllTeacherSubjects {
+  getAllTeacherSubjects {
+    _id
+    teacherDID
+    teacherWalletAddress
+    teacherName
+    subjectCode
+    subjectName
+    academicYear
+    semester
+    batches
+    department
+    isActive
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getTeacherSubjectsByTeacher</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN / TEACHER</span>
+                </div>
+                <p class="op-desc">Get subject assignments for a specific teacher.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetTeacherSubjectsByTeacher($teacherWalletAddress: String!) {
+  getTeacherSubjectsByTeacher(teacherWalletAddress: $teacherWalletAddress) {
+    _id
+    subjectCode
+    subjectName
+    academicYear
+    semester
+    batches
+    department
+    isActive
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">updateTeacherSubject</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Update a teacher-subject assignment.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation UpdateTeacherSubject($input: UpdateTeacherSubjectInput!) {
+  updateTeacherSubject(input: $input) {
+    _id
+    subjectCode
+    subjectName
+    academicYear
+    semester
+    batches
+    isActive
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "subjectId": "...",
+#     "subjectName": "Advanced Math",
+#     "batches": ["A", "B", "C"],
+#     "isActive": true
+#   }
+# }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">deleteTeacherSubject</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation DeleteTeacherSubject($subjectId: String!) {
+  deleteTeacherSubject(subjectId: $subjectId) {
+    success
+    message
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">revokeCredential</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Revoke a credential from the admin panel.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation RevokeCredential($input: AdminRevokeCredentialInput!) {
+  revokeCredential(input: $input) {
+    success
+    message
+    credentialId
+  }
+}
+
+# Variables: { "input": { "credentialId": "...", "reason": "Incorrect data" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">createExamSchedule</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <p class="op-desc">Create a new exam schedule entry.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation CreateExamSchedule($input: CreateExamScheduleInput!) {
+  createExamSchedule(input: $input) {
+    _id
+    subject
+    examName
+    examType
+    examDate
+    duration
+    totalMarks
+    passingMarks
+    venue
+    status
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "subject": "Mathematics",
+#     "examName": "Midterm Exam",
+#     "examType": "MIDTERM",
+#     "examDate": "2026-03-15T10:00:00Z",
+#     "duration": 120,
+#     "totalMarks": 100,
+#     "passingMarks": 40,
+#     "venue": "Hall A",
+#     "teacherWalletAddress": "0x...",
+#     "academicYear": "2025-26",
+#     "semester": "5",
+#     "batch": "A"
+#   }
+# }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getAllExamSchedules</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetAllExamSchedules {
+  getAllExamSchedules {
+    _id
+    subject
+    examName
+    examType
+    examDate
+    duration
+    totalMarks
+    passingMarks
+    venue
+    status
+    description
+    isActive
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getExamScheduleById</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetExamScheduleById($examId: String!) {
+  getExamScheduleById(examId: $examId) {
+    _id
+    subject
+    examName
+    examType
+    examDate
+    duration
+    totalMarks
+    passingMarks
+    venue
+    status
+    description
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">updateExamSchedule</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation UpdateExamSchedule($input: UpdateExamScheduleInput!) {
+  updateExamSchedule(input: $input) {
+    _id
+    subject
+    examName
+    examType
+    examDate
+    duration
+    totalMarks
+    passingMarks
+    venue
+    status
+  }
+}
+
+# Variables:
+# { "input": { "examId": "...", "venue": "Hall B", "status": "COMPLETED" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">deleteExamSchedule</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation DeleteExamSchedule($examId: String!) {
+  deleteExamSchedule(examId: $examId) {
+    success
+    message
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getStudentsByBatch</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetStudentsByBatch($batch: String!) {
+  getStudentsByBatch(batch: $batch) {
+    _id
+    walletAddress
+    did
+    name
+    studentId
+    email
+    isActive
+    batch
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== TEACHER ======================== -->
+        <div class="section" id="teacher">
+            <h2 class="section-title">🎓 Teacher Module</h2>
+            <p class="section-desc">Teacher dashboard APIs — course setup, student management, credential viewing, and
+                marks upload.</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getTeacherCourseSetup</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER</span>
+                </div>
+                <p class="op-desc">Get teacher's course setup overview (subjects, batches, total students).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetTeacherCourseSetup {
+  getTeacherCourseSetup {
+    totalSubjects
+    totalBatches
+    totalStudents
+    subjects {
+      _id
+      subjectCode
+      subjectName
+      academicYear
+      semester
+      batches
+      department
+    }
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getTeacherStudents</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER</span>
+                </div>
+                <p class="op-desc">Get students visible to the teacher. Optionally filter by batch.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetTeacherStudents($batch: String) {
+  getTeacherStudents(batch: $batch) {
+    _id
+    walletAddress
+    did
+    name
+    studentId
+    email
+    batch
+    isActive
+  }
+}
+
+# $batch is optional — omit to get all students</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getTeacherCredentials</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER</span>
+                </div>
+                <p class="op-desc">Get credentials issued by the teacher. Optionally filter by subject.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetTeacherCredentials($subject: String) {
+  getTeacherCredentials(subject: $subject) {
+    _id
+    studentDID
+    studentName
+    subject
+    marks
+    grade
+    examType
+    academicYear
+    semester
+    isRevoked
+    blockchainTxHash
+    ipfsHash
+    createdAt
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">uploadMarks</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">TEACHER</span>
+                </div>
+                <p class="op-desc">Upload marks for a student — creates a verifiable credential.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation UploadMarks($input: UploadMarksInput!) {
+  uploadMarks(input: $input) {
+    success
+    message
+    credentialId
+    vcHash
+  }
+}
+
+# Variables:
+# {
+#   "input": {
+#     "studentWalletAddress": "0x...",
+#     "subject": "Mathematics",
+#     "marks": 85,
+#     "examType": "MIDTERM",
+#     "academicYear": "2025-26",
+#     "semester": "5",
+#     "grade": "A",
+#     "institution": "DAIICT"
+#   }
+# }</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== NOTIFICATION ======================== -->
+        <div class="section" id="notification">
+            <h2 class="section-title">🔔 Notification Module</h2>
+            <p class="section-desc">User notification management — fetch, mark as read, delete.</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getMyNotifications</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <p class="op-desc">Get notifications for the logged-in user. Optionally limit results.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetMyNotifications($limit: Int) {
+  getMyNotifications(limit: $limit) {
+    _id
+    recipientDID
+    recipientWalletAddress
+    type
+    title
+    message
+    metadata
+    isRead
+    readAt
+    senderDID
+    senderWalletAddress
+    relatedEntityId
+    relatedEntityType
+    createdAt
+  }
+}
+
+# $limit is optional — omit for all notifications</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getUnreadNotificationsCount</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetUnreadNotificationsCount {
+  getUnreadNotificationsCount
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">markNotificationAsRead</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation MarkNotificationAsRead($input: MarkNotificationReadInput!) {
+  markNotificationAsRead(input: $input) {
+    success
+    message
+  }
+}
+
+# Variables: { "input": { "notificationId": "..." } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">markAllNotificationsAsRead</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation MarkAllNotificationsAsRead {
+  markAllNotificationsAsRead {
+    success
+    message
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">deleteNotification</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation DeleteNotification($notificationId: String!) {
+  deleteNotification(notificationId: $notificationId) {
+    success
+    message
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== UTILITY ======================== -->
+        <div class="section" id="utility">
+            <h2 class="section-title">🔧 Utility Module</h2>
+            <p class="section-desc">System health, hashing, DID validation, nonce generation, timestamp validation, and
+                string sanitization.</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">healthCheck</span>
+                    <span class="badge badge-public">Public</span>
+                </div>
+                <p class="op-desc">Public health check endpoint — no auth required.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query HealthCheck {
+  healthCheck {
+    status
+    timestamp
+    uptime
+    version
+    environment
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">getSystemInfo</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ADMIN</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GetSystemInfo {
+  getSystemInfo {
+    success
+    message
+    nodeVersion
+    platform
+    architecture
+    totalMemory
+    freeMemory
+    uptime
+  }
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">validateDID</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ALL ROLES</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query ValidateDID($validateDIDDto: ValidateDIDDto!) {
+  validateDID(validateDIDDto: $validateDIDDto) {
+    success
+    message
+    isValid
+    did
+    method
+    network
+  }
+}
+
+# Variables: { "validateDIDDto": { "did": "did:markchain:0x..." } }</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">generateNonce</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ALL ROLES</span>
+                </div>
+                <p class="op-desc">Generate a cryptographic nonce (utility version, returns JSON string).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query GenerateNonce {
+  generateNonce
+}</pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge badge-query">Query</span>
+                    <span class="op-name">validateTimestamp</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ALL ROLES</span>
+                </div>
+                <p class="op-desc">Check if a timestamp is within the allowed age window. Returns Boolean.</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">query ValidateTimestamp($timestamp: Float!, $maxAgeMs: Float) {
+  validateTimestamp(timestamp: $timestamp, maxAgeMs: $maxAgeMs)
+}
+
+# $maxAgeMs defaults to 300000 (5 minutes)</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">hashData</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ALL ROLES</span>
+                </div>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation HashData($hashDataDto: HashDataDto!) {
+  hashData(hashDataDto: $hashDataDto) {
+    success
+    message
+    hash
+    algorithm
+    originalData
+  }
+}
+
+# Variables: { "hashDataDto": { "data": "hello", "algorithm": "sha256" } }</pre>
+                </div>
+            </div>
+
+            <div class="card mutation">
+                <div class="card-header">
+                    <span class="badge badge-mutation">Mutation</span>
+                    <span class="op-name">sanitizeString</span>
+                    <span class="badge badge-auth">🔒 Auth</span>
+                    <span class="badge badge-role">ALL ROLES</span>
+                </div>
+                <p class="op-desc">Sanitize an input string (removes XSS / injection vectors).</p>
+                <div class="code-wrap">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre class="code-block">mutation SanitizeString($input: String!) {
+  sanitizeString(input: $input)
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            MarkChain API Docs • NestJS + GraphQL • Sepolia Testnet + IPFS<br>
+            All authenticated requests require header: <code>Authorization: Bearer &lt;JWT_TOKEN&gt;</code>
+        </footer>
+    </div>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.nextElementSibling.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+            });
+        }
+    </script>
+</body>
+
+</html>

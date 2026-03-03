@@ -123,53 +123,6 @@ export class BlockchainService {
   }
 
   // Credential Management Functions
-  async issueOrUpdateCredential(
-    studentAddress: string,
-    subject: string,
-    ipfsHash: string
-  ): Promise<string> {
-    try {
-      const tx = await this.contract.issueOrUpdateCredential(
-        studentAddress,
-        subject,
-        ipfsHash
-      );
-      await tx.wait();
-      this.logger.log(`Credential issued for ${studentAddress} in ${subject}`);
-      return tx.hash;
-    } catch (error) {
-      this.logger.error(`Failed to issue credential: ${error.message}`);
-      throw error;
-    }
-  }
-
-  // Alias method for issueOrUpdateCredential with DID-based parameters
-  async issueCredential(
-    studentDID: string,
-    vcHash: string,
-    ipfsHash: string
-  ): Promise<string> {
-    try {
-      // Extract address from DID if needed, or use as is
-      // DID format: did:ethr:0xAddress
-      const addressMatch = studentDID.match(/0x[a-fA-F0-9]{40}/);
-      const studentAddress = addressMatch ? addressMatch[0] : studentDID;
-
-      // Use a generic subject identifier or hash for this type of credential
-      const tx = await this.contract.issueOrUpdateCredential(
-        studentAddress,
-        vcHash.substring(0, 32), // Use first 32 chars of hash as subject identifier
-        ipfsHash
-      );
-      await tx.wait();
-      this.logger.log(`Credential issued for ${studentDID} with hash ${vcHash}`);
-      return tx.hash;
-    } catch (error) {
-      this.logger.error(`Failed to issue credential: ${error.message}`);
-      throw error;
-    }
-  }
-
   async revokeCredential(studentAddress: string, subject: string): Promise<string> {
     try {
       const tx = await this.contract.revokeCredential(studentAddress, subject);
@@ -178,27 +131,6 @@ export class BlockchainService {
       return tx.hash;
     } catch (error) {
       this.logger.error(`Failed to revoke credential: ${error.message}`);
-      throw error;
-    }
-  }
-
-  async getMySubjectCredential(subject: string): Promise<any> {
-    try {
-      return await this.contract.getMySubjectCredential(subject);
-    } catch (error) {
-      this.logger.error(`Failed to get my credential: ${error.message}`);
-      throw error;
-    }
-  }
-
-  async getStudentSubjectCredential(
-    studentAddress: string,
-    subject: string
-  ): Promise<any> {
-    try {
-      return await this.contract.getStudentSubjectCredential(studentAddress, subject);
-    } catch (error) {
-      this.logger.error(`Failed to get student credential: ${error.message}`);
       throw error;
     }
   }
@@ -230,21 +162,23 @@ export class BlockchainService {
 
   async getTeacherSubjects(teacherAddress: string): Promise<string[]> {
     try {
-      const subjects: string[] = [];
-      let index = 0;
-      
-      while (true) {
+      // Contract now uses mapping (not array), so we get subjects from MongoDB
+      // and verify each against the contract's hasSubject mapping
+      const allSubjects = await this.subjectModel.find({ isActive: true }).exec();
+      const assignedSubjects: string[] = [];
+
+      for (const subject of allSubjects) {
         try {
-          const subject = await this.contract.teacherSubjects(teacherAddress, index);
-          if (!subject) break;
-          subjects.push(subject);
-          index++;
+          const hasIt = await this.contract.hasSubject(teacherAddress, subject.subjectName);
+          if (hasIt) {
+            assignedSubjects.push(subject.subjectName);
+          }
         } catch {
-          break;
+          // Skip subjects that fail the check
         }
       }
-      
-      return subjects;
+
+      return assignedSubjects;
     } catch (error) {
       this.logger.error(`Failed to get teacher subjects: ${error.message}`);
       throw error;
@@ -256,7 +190,8 @@ export class BlockchainService {
     return {
       DEFAULT_ADMIN_ROLE: ethers.ZeroHash,
       STUDENT_ROLE: ethers.keccak256(ethers.toUtf8Bytes('STUDENT_ROLE')),
-      TEACHER_ROLE: ethers.keccak256(ethers.toUtf8Bytes('TEACHER_ROLE'))
+      TEACHER_ROLE: ethers.keccak256(ethers.toUtf8Bytes('TEACHER_ROLE')),
+      BACKEND_ROLE: ethers.keccak256(ethers.toUtf8Bytes('BACKEND_ROLE'))
     };
   }
 
@@ -357,7 +292,7 @@ export class BlockchainService {
     try {
       const result = await this.contract.getMyCredential(subject);
       this.logger.log(`Retrieved credential for subject: ${subject}`);
-      
+
       return {
         ipfsHash: result.ipfsHash,
         version: result.version,
@@ -396,7 +331,7 @@ export class BlockchainService {
     try {
       const result = await this.contract.getStudentCredential(studentAddress, subject);
       this.logger.log(`Retrieved credential for ${studentAddress} in ${subject}`);
-      
+
       return {
         ipfsHash: result.ipfsHash,
         version: result.version,
@@ -451,37 +386,37 @@ export class BlockchainService {
   ) {
     try {
       // Validate transaction hash - check for all falsy values
-      if (!transactionHash || 
-          transactionHash === 'null' || 
-          transactionHash === 'undefined' ||
-          typeof transactionHash === 'undefined' ||
-          transactionHash.trim() === '') {
+      if (!transactionHash ||
+        transactionHash === 'null' ||
+        transactionHash === 'undefined' ||
+        typeof transactionHash === 'undefined' ||
+        transactionHash.trim() === '') {
         throw new Error('Transaction hash is required. Please sign the transaction with MetaMask first. Frontend must send the tx hash from MetaMask.');
       }
-      
+
       // Validate transaction hash format (should be 0x followed by 64 hex characters)
       const txHashRegex = /^0x[a-fA-F0-9]{64}$/;
       if (!txHashRegex.test(transactionHash)) {
         throw new Error(`Invalid transaction hash format. Received: "${transactionHash}". Expected: 0x followed by 64 hexadecimal characters.`);
       }
-      
+
       // Verify transaction exists on blockchain
       const txReceipt = await this.provider.getTransactionReceipt(transactionHash);
       if (!txReceipt) {
         throw new Error('Transaction not found on blockchain. Please wait for confirmation.');
       }
-      
+
       if (txReceipt.status === 0) {
         throw new Error('Transaction failed on blockchain');
       }
-      
+
       // Verify transaction was sent to our contract
       if (txReceipt.to?.toLowerCase() !== this.contract.target.toString().toLowerCase()) {
         throw new Error('Transaction was not sent to the correct contract');
       }
-      
+
       this.logger.log(`Transaction verified successfully`);
-      
+
       // Check if subject already exists with this transaction hash
       const existingSubject = await this.subjectModel.findOne({ blockchainHash: transactionHash });
       if (existingSubject) {
@@ -502,7 +437,7 @@ export class BlockchainService {
           }
         };
       }
-      
+
       // Save to MongoDB
       const newSubject = new this.subjectModel({
         subjectName,
@@ -512,10 +447,10 @@ export class BlockchainService {
         credits,
         isActive: true,
       });
-      
+
       const savedSubject = await newSubject.save();
       this.logger.log(`Subject saved to MongoDB: ${subjectName}`);
-      
+
       return {
         success: true,
         txHash: transactionHash,
@@ -547,8 +482,8 @@ export class BlockchainService {
    * @returns Transaction hash, success status, and saved component
    */
   async registerComponent(
-    subject: string, 
-    component: string, 
+    subject: string,
+    component: string,
     createdBy?: string,
     weightage?: number,
     maxMarks?: number
@@ -569,7 +504,7 @@ export class BlockchainService {
       }
       await tx.wait();
       this.logger.log(`Component '${component}' registered on blockchain for subject: ${subject}`);
-      
+
       // Save to MongoDB
       const newComponent = new this.componentModel({
         componentName: component,
@@ -582,8 +517,8 @@ export class BlockchainService {
       });
       const savedComponent = await newComponent.save();
       this.logger.log(`Component saved to MongoDB: ${component}`);
-      
-      return { 
+
+      return {
         txHash: tx.hash,
         success: true,
         component: {
@@ -652,60 +587,299 @@ export class BlockchainService {
     }
   }
 
- async createNewCredential(
-  studentAddress: string,
-  subjectName: string,
-  credentialData: object,
-  validityPeriod: number // in seconds, e.g. 31536000 = 1 year
-): Promise<{ txHash: string; ipfsHash: string; success: boolean }> {
-  try {
-    // 1. Check subject exists in MongoDB
-    const subject = await this.subjectModel.findOne({ subjectName, isActive: true });
-    if (!subject) {
-      throw new Error(`Subject '${subjectName}' does not exist. Create it first.`);
-    }
-
-    // 2. Check credential doesn't already exist for this student+subject
-    const alreadyExists = await this.contract.isCredentialValid(studentAddress, subjectName)
-      .catch(() => false);
-    // isCredentialValid returns false for non-existent too, so check via getStudentCredential
+  async createNewCredential(
+    studentAddress: string,
+    subjectName: string,
+    credentialData: object,
+    validityPeriod: number // in seconds, e.g. 31536000 = 1 year
+  ): Promise<{ txHash: string; ipfsHash: string; success: boolean }> {
     try {
-      const existing = await this.contract.getStudentCredential(studentAddress, subjectName);
-      if (existing && existing.createdAt > 0n) {
-        throw new Error(
-          `Credential already exists for student ${studentAddress} in subject '${subjectName}'. Use updateCredentialWithComponent to add grades.`
-        );
+      // 1. Check subject exists in MongoDB
+      const subject = await this.subjectModel.findOne({ subjectName, isActive: true });
+      if (!subject) {
+        throw new Error(`Subject '${subjectName}' does not exist. Create it first.`);
       }
-    } catch (e) {
-      // If error is our custom message, rethrow
-      if (e.message.includes('Credential already exists')) throw e;
-      // Otherwise it means credential doesn't exist — continue
+
+      // 2. Check credential doesn't already exist for this student+subject
+      const alreadyExists = await this.contract.isCredentialValid(studentAddress, subjectName)
+        .catch(() => false);
+      // isCredentialValid returns false for non-existent too, so check via getStudentCredential
+      try {
+        const existing = await this.contract.getStudentCredential(studentAddress, subjectName);
+        if (existing && existing.createdAt > 0n) {
+          throw new Error(
+            `Credential already exists for student ${studentAddress} in subject '${subjectName}'. Use updateCredentialWithComponent to add grades.`
+          );
+        }
+      } catch (e) {
+        // If error is our custom message, rethrow
+        if (e.message.includes('Credential already exists')) throw e;
+        // Otherwise it means credential doesn't exist — continue
+      }
+
+      // 3. Upload credential data to IPFS
+      const ipfsHash = await this.ipfsService.uploadCredential({
+        ...credentialData,
+        subject: subjectName,
+        studentAddress,
+        createdAt: new Date().toISOString(),
+      } as any);
+      this.logger.log(`Credential data uploaded to IPFS: ${ipfsHash}`);
+
+      // 4. Create credential on blockchain
+      const tx = await this.contract.createCredential(
+        studentAddress,
+        subjectName,
+        ipfsHash,
+        validityPeriod
+      );
+      await tx.wait();
+      this.logger.log(`Credential created on blockchain for ${studentAddress} in ${subjectName}`);
+
+      return { txHash: tx.hash, ipfsHash, success: true };
+    } catch (error) {
+      this.logger.error(`Failed to create credential: ${error.message}`);
+      throw error;
     }
-
-    // 3. Upload credential data to IPFS
-    const ipfsHash = await this.ipfsService.uploadCredential({
-      ...credentialData,
-      subject: subjectName,
-      studentAddress,
-      createdAt: new Date().toISOString(),
-    } as any);
-    this.logger.log(`Credential data uploaded to IPFS: ${ipfsHash}`);
-
-    // 4. Create credential on blockchain
-    const tx = await this.contract.createCredential(
-      studentAddress,
-      subjectName,
-      ipfsHash,
-      validityPeriod
-    );
-    await tx.wait();
-    this.logger.log(`Credential created on blockchain for ${studentAddress} in ${subjectName}`);
-
-    return { txHash: tx.hash, ipfsHash, success: true };
-  } catch (error) {
-    this.logger.error(`Failed to create credential: ${error.message}`);
-    throw error;
   }
-}
+
+  // ==================== NEW CONTRACT API METHODS ====================
+
+  /**
+   * Remove a component from a subject (Admin only)
+   * Also deactivates the component in MongoDB
+   */
+  async removeComponent(subject: string, component: string): Promise<string> {
+    try {
+      const tx = await this.contract.removeComponent(subject, component);
+      await tx.wait();
+      this.logger.log(`Component '${component}' removed from subject: ${subject}`);
+
+      // Deactivate in MongoDB
+      await this.componentModel.updateOne(
+        { subjectName: subject, componentName: component },
+        { isActive: false }
+      );
+
+      return tx.hash;
+    } catch (error) {
+      this.logger.error(`Failed to remove component: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Batch update component grades for multiple students
+   */
+  async batchUpdateComponent(
+    students: string[],
+    subject: string,
+    component: string,
+    ipfsHashes: string[]
+  ): Promise<string> {
+    try {
+      const tx = await this.contract.batchUpdateComponent(
+        students,
+        subject,
+        component,
+        ipfsHashes
+      );
+      await tx.wait();
+      this.logger.log(
+        `Batch update: ${students.length} students graded for '${component}' in ${subject}`
+      );
+      return tx.hash;
+    } catch (error) {
+      this.logger.error(`Failed to batch update component: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a component is valid/registered for a subject
+   */
+  async isValidComponent(subject: string, component: string): Promise<boolean> {
+    try {
+      return await this.contract.validComponents(subject, component);
+    } catch (error) {
+      this.logger.error(`Failed to check component validity: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get credential completion stats for a student in a subject
+   */
+  async getCredentialStats(
+    studentAddress: string,
+    subject: string
+  ): Promise<{
+    exists: boolean;
+    isValid: boolean;
+    componentsGraded: number;
+    totalComponentsInSubject: number;
+    completionPercentage: number;
+  }> {
+    try {
+      const result = await this.contract.getCredentialStats(studentAddress, subject);
+      return {
+        exists: result.exists,
+        isValid: result.isValid,
+        componentsGraded: Number(result.componentsGraded),
+        totalComponentsInSubject: Number(result.totalComponentsInSubject),
+        completionPercentage: Number(result.completionPercentage),
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get credential stats: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get component history for the caller (student) - requires student to call from their wallet
+   * NOTE: This calls the contract as the backend wallet, so it returns backend's history.
+   * For student history, use getStudentComponentHistory instead.
+   */
+  async getMyComponentHistory(subject: string): Promise<any[]> {
+    try {
+      const result = await this.contract.getMyComponentHistory(subject);
+      return result.map((entry: any) => ({
+        componentName: entry.componentName,
+        ipfsHash: entry.ipfsHash,
+        updatedBy: entry.updatedBy,
+        timestamp: entry.timestamp.toString(),
+        credentialVersion: entry.credentialVersion.toString(),
+      }));
+    } catch (error) {
+      this.logger.error(`Failed to get component history: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a subject exists on the blockchain
+   */
+  async subjectExistsOnChain(subject: string): Promise<boolean> {
+    try {
+      return await this.contract.subjectExists(subject);
+    } catch (error) {
+      this.logger.error(`Failed to check subject existence: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a teacher has a specific subject assigned
+   */
+  async hasSubject(teacher: string, subject: string): Promise<boolean> {
+    try {
+      return await this.contract.hasSubject(teacher, subject);
+    } catch (error) {
+      this.logger.error(`Failed to check teacher subject: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the number of subjects assigned to a teacher
+   */
+  async getTeacherSubjectCount(teacher: string): Promise<number> {
+    try {
+      const count = await this.contract.getTeacherSubjectCount(teacher);
+      return Number(count);
+    } catch (error) {
+      this.logger.error(`Failed to get teacher subject count: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get student's component grade history for a subject (Admin/Teacher)
+   */
+  async getStudentComponentHistory(
+    studentAddress: string,
+    subject: string
+  ): Promise<any[]> {
+    try {
+      const result = await this.contract.getStudentComponentHistory(studentAddress, subject);
+      return result.map((entry: any) => ({
+        componentName: entry.componentName,
+        ipfsHash: entry.ipfsHash,
+        updatedBy: entry.updatedBy,
+        timestamp: entry.timestamp.toString(),
+        credentialVersion: entry.credentialVersion.toString(),
+      }));
+    } catch (error) {
+      this.logger.error(`Failed to get student component history: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Admin registers DID on behalf of a user
+   */
+  async registerDIDForUser(userAddress: string, did: string): Promise<string> {
+    try {
+      const tx = await this.contract.registerDIDForUser(userAddress, did);
+      await tx.wait();
+      this.logger.log(`DID registered for user ${userAddress}: ${did}`);
+      return tx.hash;
+    } catch (error) {
+      this.logger.error(`Failed to register DID for user: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert a DID hash to its associated address
+   */
+  async didToAddress(didHash: string): Promise<string> {
+    try {
+      const address = await this.contract.didToAddress(didHash);
+      return address;
+    } catch (error) {
+      this.logger.error(`Failed to resolve DID to address: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * User renounces their own role
+   */
+  async renounceRole(role: string, callerConfirmation: string): Promise<string> {
+    try {
+      const tx = await this.contract.renounceRole(role, callerConfirmation);
+      await tx.wait();
+      this.logger.log(`Role ${role} renounced by ${callerConfirmation}`);
+      return tx.hash;
+    } catch (error) {
+      this.logger.error(`Failed to renounce role: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the admin role that controls a given role
+   */
+  async getRoleAdmin(role: string): Promise<string> {
+    try {
+      return await this.contract.getRoleAdmin(role);
+    } catch (error) {
+      this.logger.error(`Failed to get role admin: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if contract supports a given interface (ERC165)
+   */
+  async supportsInterface(interfaceId: string): Promise<boolean> {
+    try {
+      return await this.contract.supportsInterface(interfaceId);
+    } catch (error) {
+      this.logger.error(`Failed to check interface support: ${error.message}`);
+      throw error;
+    }
+  }
 
 }
