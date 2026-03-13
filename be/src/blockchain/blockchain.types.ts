@@ -295,16 +295,24 @@ export class CreateSubjectInput {
 
 @InputType()
 export class RegisterComponentInput {
-  @Field()
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
   subjectName: string;
 
-  @Field()
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
   componentName: string;
 
   @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
   weightage?: number;
 
   @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
   maxMarks?: number;
 }
 

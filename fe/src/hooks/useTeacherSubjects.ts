@@ -1,12 +1,15 @@
 import { useMutation, useQuery } from '@apollo/client';
 import {
     // Mutations
+    CREATE_TEACHER_SUBJECT,
     UPDATE_TEACHER_SUBJECT,
     DELETE_TEACHER_SUBJECT,
     // Queries
     GET_ALL_TEACHER_SUBJECTS,
     GET_TEACHER_SUBJECTS_BY_TEACHER,
     // Types
+    CreateTeacherSubjectInput,
+    CreateTeacherSubjectResponse,
     UpdateTeacherSubjectInput,
     GetAllTeacherSubjectsResponse,
     GetTeacherSubjectsByTeacherResponse,
@@ -37,6 +40,12 @@ export const useGetTeacherSubjectsByTeacher = (
 };
 
 // Mutations
+export const useCreateTeacherSubject = () => {
+    return useMutation<CreateTeacherSubjectResponse, { input: CreateTeacherSubjectInput }>(
+        CREATE_TEACHER_SUBJECT
+    );
+};
+
 export const useUpdateTeacherSubject = () => {
     return useMutation<UpdateTeacherSubjectResponse, { input: UpdateTeacherSubjectInput }>(
         UPDATE_TEACHER_SUBJECT
@@ -59,6 +68,7 @@ export const useTeacherSubjects = (teacherWalletAddress?: string) => {
     const { data: teacherSubjects, loading: loadingTeacher, error: errorTeacher, refetch: refetchTeacher } =
         useGetTeacherSubjectsByTeacher(teacherWalletAddress || '', { skip: !teacherWalletAddress });
 
+    const [createSubject] = useCreateTeacherSubject();
     const [updateSubject] = useUpdateTeacherSubject();
     const [deleteSubject] = useDeleteTeacherSubject();
 
@@ -69,6 +79,7 @@ export const useTeacherSubjects = (teacherWalletAddress?: string) => {
         error: errorAll || errorTeacher,
         refetchAll,
         refetchTeacher,
+        createSubject,
         updateSubject,
         deleteSubject
     };

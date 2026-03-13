@@ -547,13 +547,42 @@ export class BlockchainService {
    * @returns Transaction hash, success status, and saved component
    */
   async registerComponent(
-    subject: string, 
-    component: string, 
+    subject: string,
+    component: string,
     createdBy?: string,
     weightage?: number,
     maxMarks?: number
   ) {
     try {
+      // Debug logging
+      this.logger.debug(`registerComponent called with:`, {
+        subject,
+        component,
+        createdBy,
+        weightage,
+        maxMarks,
+        subjectType: typeof subject,
+        componentType: typeof component,
+      });
+
+      // Validate required inputs
+      if (!subject || typeof subject !== 'string' || subject.trim() === '') {
+        throw new Error('Subject name is required and must be a valid string');
+      }
+
+      if (!component || typeof component !== 'string' || component.trim() === '') {
+        throw new Error('Component name is required and must be a valid string');
+      }
+
+      // Validate optional numeric fields if provided
+      if (weightage !== undefined && (typeof weightage !== 'number' || weightage < 0)) {
+        throw new Error('Weightage must be a non-negative number');
+      }
+
+      if (maxMarks !== undefined && (typeof maxMarks !== 'number' || maxMarks < 0)) {
+        throw new Error('Max marks must be a non-negative number');
+      }
+
       // Guard: check the function exists on the deployed contract
       if (typeof this.contract.registerComponent !== 'function') {
         throw new Error(
@@ -569,7 +598,7 @@ export class BlockchainService {
       }
       await tx.wait();
       this.logger.log(`Component '${component}' registered on blockchain for subject: ${subject}`);
-      
+
       // Save to MongoDB
       const newComponent = new this.componentModel({
         componentName: component,
@@ -582,8 +611,8 @@ export class BlockchainService {
       });
       const savedComponent = await newComponent.save();
       this.logger.log(`Component saved to MongoDB: ${component}`);
-      
-      return { 
+
+      return {
         txHash: tx.hash,
         success: true,
         component: {

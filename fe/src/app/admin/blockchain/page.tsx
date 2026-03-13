@@ -19,10 +19,12 @@ import {
   useCreateCredential,
   useUpdateCredentialWithComponent,
   useCreateSubject,
-  useRegisterComponent
+  useRegisterComponent,
+  useGetAllSubjects
 } from "@/hooks/useCredentialManagement";
+import { useTeacherSubjects, useGetTeacherSubjectsByTeacher } from "@/hooks/useTeacherSubjects";
 import { useGetAllUsers } from "@/hooks/useGraphQL";
-import { UserRole } from "@/gql/types";
+import { UserRole, TeacherSubject } from "@/gql/types";
 
 interface AssignRoleModalProps {
   isOpen: boolean;
@@ -125,6 +127,27 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState<'assign' | 'remove'>('assign');
 
+  // Fetch all subjects for "assign" mode
+  const { data: allSubjectsData, loading: allSubjectsLoading } = useGetAllSubjects();
+  const allSubjectsList = allSubjectsData?.getAllSubjects || [];
+
+  // Fetch teacher's assigned subjects for "remove" mode
+  const { data: teacherSubjectsData, loading: teacherSubjectsLoading } = useGetTeacherSubjectsByTeacher(
+    selectedTeacher,
+    { skip: !selectedTeacher || action !== 'remove' }
+  );
+  const teacherSubjectsList = teacherSubjectsData?.getTeacherSubjectsByTeacher || [];
+
+  const handleActionChange = (newAction: 'assign' | 'remove') => {
+    setAction(newAction);
+    setSubject("");
+  };
+
+  const handleTeacherChange = (addr: string) => {
+    setSelectedTeacher(addr);
+    setSubject("");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedTeacher && subject) {
@@ -141,6 +164,8 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
 
   if (!isOpen) return null;
 
+  const subjectDropdownLoading = action === 'assign' ? allSubjectsLoading : teacherSubjectsLoading;
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-xl border border-white/10 p-6 w-full max-w-md">
@@ -152,7 +177,7 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
             </label>
             <select
               value={action}
-              onChange={(e) => setAction(e.target.value as 'assign' | 'remove')}
+              onChange={(e) => handleActionChange(e.target.value as 'assign' | 'remove')}
               className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"
             >
               <option value="assign">Assign Subject</option>
@@ -166,7 +191,7 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
             </label>
             <select
               value={selectedTeacher}
-              onChange={(e) => setSelectedTeacher(e.target.value)}
+              onChange={(e) => handleTeacherChange(e.target.value)}
               className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"
               required
             >
@@ -183,14 +208,30 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Subject
             </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Enter subject name"
-              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"
-              required
-            />
+            {subjectDropdownLoading ? (
+              <div className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-400">
+                Loading subjects...
+              </div>
+            ) : (
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                required
+              >
+                <option value="">
+                  {action === 'assign' ? 'Select a subject to assign...' : (selectedTeacher ? 'Select a subject to remove...' : 'Select a teacher first...')}
+                </option>
+                {action === 'assign'
+                  ? allSubjectsList.filter(s => s.isActive).map((s) => (
+                    <option key={s._id} value={s.subjectName}>{s.subjectName}</option>
+                  ))
+                  : teacherSubjectsList.map((ts) => (
+                    <option key={ts._id} value={ts.subjectName}>{ts.subjectName} ({ts.subjectCode})</option>
+                  ))
+                }
+              </select>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -203,7 +244,7 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !subject || !selectedTeacher}
               className={`flex-1 px-4 py-2 rounded-lg transition-colors text-white ${action === 'assign'
                 ? 'bg-green-600 hover:bg-green-700'
                 : 'bg-red-600 hover:bg-red-700'
@@ -593,6 +634,27 @@ export default function AdminBlockchainPage() {
   const [blockchainStatus, setBlockchainStatus] = useState('');
   const [createSubjectProcessing, setCreateSubjectProcessing] = useState(false);
 
+  // Teacher Subject CRUD state
+  const [showCreateTeacherSubjectModal, setShowCreateTeacherSubjectModal] = useState(false);
+  const [showEditTeacherSubjectModal, setShowEditTeacherSubjectModal] = useState(false);
+  const [deletingTeacherSubjectId, setDeletingTeacherSubjectId] = useState<string | null>(null);
+  const [editingTeacherSubject, setEditingTeacherSubject] = useState<TeacherSubject | null>(null);
+  const [tsForm, setTsForm] = useState({
+    teacherWalletAddress: "",
+    subjectCode: "",
+    subjectName: "",
+    academicYear: "",
+    semester: "",
+    batches: "",
+    department: "",
+  });
+  const [tsEditForm, setTsEditForm] = useState({
+    subjectName: "",
+    batches: "",
+    semester: "",
+    isActive: true,
+  });
+
   // Hooks for blockchain operations
   const [assignRole, { loading: assignRoleLoading }] = useAssignBlockchainRole();
   const [assignSubject, { loading: assignSubjectLoading }] = useAssignSubjectToTeacher();
@@ -613,6 +675,16 @@ export default function AdminBlockchainPage() {
   const users = usersData?.getAllUsers || [];
   const teachers = users.filter(user => user.role === UserRole.TEACHER);
   const students = users.filter(user => user.role === UserRole.STUDENT);
+
+  // Teacher Subject CRUD hooks
+  const {
+    allSubjects: allTeacherSubjects,
+    loading: tsLoading,
+    refetchAll: refetchTeacherSubjects,
+    createSubject: createTeacherSubjectMutation,
+    updateSubject: updateTeacherSubjectMutation,
+    deleteSubject: deleteTeacherSubjectMutation,
+  } = useTeacherSubjects();
 
   const handleAssignRole = async (userAddress: string, role: string) => {
     try {
@@ -837,6 +909,90 @@ export default function AdminBlockchainPage() {
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     }
+  };
+
+  // ── Teacher Subject CRUD handlers ──
+  const handleCreateTeacherSubject = async () => {
+    if (!tsForm.teacherWalletAddress || !tsForm.subjectCode || !tsForm.subjectName || !tsForm.academicYear || !tsForm.semester || !tsForm.batches) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    try {
+      const result = await createTeacherSubjectMutation({
+        variables: {
+          input: {
+            teacherWalletAddress: tsForm.teacherWalletAddress,
+            subjectCode: tsForm.subjectCode,
+            subjectName: tsForm.subjectName,
+            academicYear: tsForm.academicYear,
+            semester: tsForm.semester,
+            batches: tsForm.batches.split(',').map(b => b.trim()),
+            department: tsForm.department || undefined,
+          },
+        },
+      });
+      if (result.data?.createTeacherSubject) {
+        alert('Teacher-subject assignment created successfully!');
+        setShowCreateTeacherSubjectModal(false);
+        setTsForm({ teacherWalletAddress: '', subjectCode: '', subjectName: '', academicYear: '', semester: '', batches: '', department: '' });
+        refetchTeacherSubjects();
+      }
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const handleUpdateTeacherSubject = async () => {
+    if (!editingTeacherSubject) return;
+    try {
+      const result = await updateTeacherSubjectMutation({
+        variables: {
+          input: {
+            subjectId: editingTeacherSubject._id,
+            subjectName: tsEditForm.subjectName || undefined,
+            batches: tsEditForm.batches ? tsEditForm.batches.split(',').map(b => b.trim()) : undefined,
+            semester: tsEditForm.semester || undefined,
+            isActive: tsEditForm.isActive,
+          },
+        },
+      });
+      if (result.data?.updateTeacherSubject) {
+        alert('Teacher-subject updated successfully!');
+        setShowEditTeacherSubjectModal(false);
+        setEditingTeacherSubject(null);
+        refetchTeacherSubjects();
+      }
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const handleDeleteTeacherSubject = async (subjectId: string) => {
+    try {
+      const result = await deleteTeacherSubjectMutation({
+        variables: { subjectId },
+      });
+      if (result.data?.deleteTeacherSubject?.success) {
+        alert('Teacher-subject deleted successfully!');
+        setDeletingTeacherSubjectId(null);
+        refetchTeacherSubjects();
+      } else {
+        alert(result.data?.deleteTeacherSubject?.message || 'Failed to delete');
+      }
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const openEditTeacherSubject = (ts: TeacherSubject) => {
+    setEditingTeacherSubject(ts);
+    setTsEditForm({
+      subjectName: ts.subjectName,
+      batches: ts.batches?.join(', ') || '',
+      semester: ts.semester || '',
+      isActive: ts.isActive !== false,
+    });
+    setShowEditTeacherSubjectModal(true);
   };
 
 
@@ -1073,6 +1229,94 @@ export default function AdminBlockchainPage() {
           </div>
         </div>
 
+        {/* ── Teacher Subjects Management (DB-level CRUD) ── */}
+        <div className="px-6 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-white">Teacher Subject Assignments</h2>
+            <button
+              onClick={() => setShowCreateTeacherSubjectModal(true)}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-white text-sm font-medium flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create Assignment
+            </button>
+          </div>
+
+          <div className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden" style={{ backgroundColor: '#12121a' }}>
+            {tsLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
+              </div>
+            ) : allTeacherSubjects.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400">No teacher-subject assignments found</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Teacher</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Subject</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Code</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Year</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Sem</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Batches</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Status</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-gray-400">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allTeacherSubjects.map((ts: TeacherSubject) => (
+                      <tr key={ts._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="text-white text-sm font-medium">{ts.teacherName || 'Unknown'}</div>
+                          <div className="text-gray-500 text-xs font-mono">{ts.teacherWalletAddress?.slice(0, 8)}...</div>
+                        </td>
+                        <td className="py-3 px-4 text-white text-sm">{ts.subjectName}</td>
+                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.subjectCode}</td>
+                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.academicYear || '—'}</td>
+                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.semester || '—'}</td>
+                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.batches?.join(', ') || '—'}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ts.isActive !== false ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                            }`}>
+                            {ts.isActive !== false ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => openEditTeacherSubject(ts)}
+                              className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setDeletingTeacherSubjectId(ts._id)}
+                              className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Modals */}
         <AssignRoleModal
           isOpen={showAssignRoleModal}
@@ -1129,6 +1373,162 @@ export default function AdminBlockchainPage() {
           onRegister={handleRegisterComponent}
           loading={registerComponentLoading}
         />
+
+        {/* ── Create Teacher Subject Modal ── */}
+        {showCreateTeacherSubjectModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-900 rounded-2xl border border-white/10 p-6 w-full max-w-lg shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-6">Create Teacher-Subject Assignment</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Teacher *</label>
+                  <select
+                    value={tsForm.teacherWalletAddress}
+                    onChange={(e) => setTsForm({ ...tsForm, teacherWalletAddress: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none"
+                  >
+                    <option value="">Select teacher...</option>
+                    {teachers.map((t) => (
+                      <option key={t.walletAddress} value={t.walletAddress}>
+                        {t.name || 'Anonymous'} ({t.walletAddress.slice(0, 8)}...)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject Code *</label>
+                    <input type="text" value={tsForm.subjectCode}
+                      onChange={(e) => setTsForm({ ...tsForm, subjectCode: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none"
+                      placeholder="MATH101" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject Name *</label>
+                    <input type="text" value={tsForm.subjectName}
+                      onChange={(e) => setTsForm({ ...tsForm, subjectName: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none"
+                      placeholder="Mathematics" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Academic Year *</label>
+                    <input type="text" value={tsForm.academicYear}
+                      onChange={(e) => setTsForm({ ...tsForm, academicYear: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none"
+                      placeholder="2025-26" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Semester *</label>
+                    <select value={tsForm.semester}
+                      onChange={(e) => setTsForm({ ...tsForm, semester: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none">
+                      <option value="">Select</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s.toString()}>Sem {s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Department</label>
+                    <input type="text" value={tsForm.department}
+                      onChange={(e) => setTsForm({ ...tsForm, department: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none"
+                      placeholder="CS" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Batches * (comma-separated)</label>
+                  <input type="text" value={tsForm.batches}
+                    onChange={(e) => setTsForm({ ...tsForm, batches: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none"
+                    placeholder="A, B, C" />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button onClick={() => setShowCreateTeacherSubjectModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">Cancel</button>
+                  <button onClick={handleCreateTeacherSubject}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-white">Create Assignment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Edit Teacher Subject Modal ── */}
+        {showEditTeacherSubjectModal && editingTeacherSubject && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-900 rounded-2xl border border-white/10 p-6 w-full max-w-md shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-6">Edit Teacher-Subject</h3>
+              <p className="text-gray-400 text-sm mb-4">Editing: <span className="text-white">{editingTeacherSubject.subjectCode}</span> — {editingTeacherSubject.teacherName || editingTeacherSubject.teacherWalletAddress?.slice(0, 10)}</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Subject Name</label>
+                  <input type="text" value={tsEditForm.subjectName}
+                    onChange={(e) => setTsEditForm({ ...tsEditForm, subjectName: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Batches (comma-separated)</label>
+                    <input type="text" value={tsEditForm.batches}
+                      onChange={(e) => setTsEditForm({ ...tsEditForm, batches: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none"
+                      placeholder="A, B, C" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Semester</label>
+                    <select value={tsEditForm.semester}
+                      onChange={(e) => setTsEditForm({ ...tsEditForm, semester: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none">
+                      <option value="">Select</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s.toString()}>Sem {s}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-gray-300">Active</label>
+                  <button
+                    onClick={() => setTsEditForm({ ...tsEditForm, isActive: !tsEditForm.isActive })}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${tsEditForm.isActive ? 'bg-green-600' : 'bg-gray-600'
+                      }`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${tsEditForm.isActive ? 'translate-x-6' : 'translate-x-0'
+                      }`} />
+                  </button>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button onClick={() => { setShowEditTeacherSubjectModal(false); setEditingTeacherSubject(null); }}
+                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">Cancel</button>
+                  <button onClick={handleUpdateTeacherSubject}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-white">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Delete Teacher Subject Confirmation ── */}
+        {deletingTeacherSubjectId && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-900 rounded-2xl border border-white/10 p-6 w-full max-w-sm shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-white">Delete Teacher-Subject</h3>
+                <p className="text-gray-400 text-sm mt-2">Are you sure? This action cannot be undone.</p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setDeletingTeacherSubjectId(null)}
+                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">Cancel</button>
+                <button onClick={() => handleDeleteTeacherSubject(deletingTeacherSubjectId)}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white">Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );

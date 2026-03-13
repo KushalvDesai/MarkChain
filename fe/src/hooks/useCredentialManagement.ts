@@ -5,10 +5,13 @@ import {
     UPDATE_CREDENTIAL_WITH_COMPONENT,
     CREATE_SUBJECT,
     REGISTER_COMPONENT,
+    CREATE_NEW_CREDENTIAL,
     // Queries
     GET_MY_CREDENTIAL,
     GET_STUDENT_CREDENTIAL,
     IS_CREDENTIAL_VALID,
+    GET_ALL_SUBJECTS,
+    GET_SUBJECT_COMPONENTS,
     // Types
     CreateCredentialInput,
     UpdateCredentialWithComponentInput,
@@ -22,7 +25,11 @@ import {
     RegisterComponentResponse,
     GetMyCredentialResponse,
     GetStudentCredentialResponse,
-    IsCredentialValidResponse
+    IsCredentialValidResponse,
+    CreateNewCredentialInput,
+    CreateNewCredentialResponse,
+    GetAllSubjectsResponse,
+    GetSubjectComponentsResponse
 } from '../gql';
 
 /**
@@ -51,6 +58,12 @@ export const useCreateSubject = () => {
 export const useRegisterComponent = () => {
     return useMutation<RegisterComponentResponse, { input: RegisterComponentInput }>(
         REGISTER_COMPONENT
+    );
+};
+
+export const useCreateNewCredential = () => {
+    return useMutation<CreateNewCredentialResponse, { input: CreateNewCredentialInput }>(
+        CREATE_NEW_CREDENTIAL
     );
 };
 
@@ -94,6 +107,23 @@ export const useIsCredentialValid = (
     );
 };
 
+export const useGetAllSubjects = () => {
+    return useQuery<GetAllSubjectsResponse>(GET_ALL_SUBJECTS);
+};
+
+export const useGetSubjectComponents = (
+    subjectName: string,
+    options?: { skip?: boolean }
+) => {
+    return useQuery<GetSubjectComponentsResponse, { subjectName: string }>(
+        GET_SUBJECT_COMPONENTS,
+        {
+            variables: { subjectName },
+            skip: !subjectName || options?.skip
+        }
+    );
+};
+
 /**
  * Higher-level composite hook for credential management
  */
@@ -102,11 +132,13 @@ export const useCredentialOperations = () => {
     const [updateCredential] = useUpdateCredentialWithComponent();
     const [createSubject] = useCreateSubject();
     const [registerComponent] = useRegisterComponent();
+    const [createNewCredential] = useCreateNewCredential();
 
     return {
         createCredential,
         updateCredential,
         createSubject,
-        registerComponent
+        registerComponent,
+        createNewCredential
     };
 };
