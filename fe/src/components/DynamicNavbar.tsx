@@ -18,15 +18,16 @@ export default function DynamicNavbar() {
     { label: "Students", href: "/admin/students" },
     { label: "Blockchain", href: "/admin/blockchain" },
     { label: "Schedule", href: "/admin/schedule" },
+    { label: "Subjects", href: "/admin/subjects" },
     { label: "Profile", href: "/profile" },
   ];
 
   // Faculty navigation items
   const facultyNavItems = [
-    { label: "Dashboard", href: "/teacher"},
-    { label: "Students", href: "/teacher/students"},
-    { label: "Credentials", href: "/teacher/credentials"},
-    { label: "Profile", href: "/profile"},
+    { label: "Dashboard", href: "/teacher" },
+    { label: "Students", href: "/teacher/students" },
+    { label: "Credentials", href: "/teacher/credentials" },
+    { label: "Profile", href: "/profile" },
   ]
 
   // Student navigation items
@@ -42,7 +43,7 @@ export default function DynamicNavbar() {
     console.log('getNavItems - Is role ADMIN?', user?.role === UserRole.ADMIN);
     console.log('getNavItems - Is role TEACHER?', user?.role === UserRole.TEACHER);
     console.log('getNavItems - UserRole enum values:', UserRole);
-    
+
     if (user?.role === UserRole.ADMIN) {
       console.log('getNavItems - Using admin navigation');
       return adminNavItems;
@@ -63,8 +64,8 @@ export default function DynamicNavbar() {
           Role: {user.role} | Navigation: {user.role === UserRole.ADMIN ? 'Admin' : 'Student'}
         </div>
       )} */}
-      
-      <GooeyNav 
+
+      <GooeyNav
         items={getNavItems()}
         initialActiveIndex={-1}
         colors={[1, 2, 3, 4]}

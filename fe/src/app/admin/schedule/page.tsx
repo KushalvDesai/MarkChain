@@ -8,7 +8,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useGetUsersByRole } from "@/hooks/useGraphQL";
 import { useExamScheduleManagement } from "@/hooks/useExamSchedule";
 import { useGetStudentsByBatch } from "@/hooks/useStudents";
-import { UserRole, ExamSchedule } from "@/gql/types";
+import { useGetAllSubjects, useGetSubjectComponents, useCreateNewCredential } from "@/hooks/useCredentialManagement";
+import { useCreateTeacherSubject } from "@/hooks/useTeacherSubjects";
+import { UserRole, ExamSchedule, Subject, Component } from "@/gql/types";
 
 // ───────────────────────────────────────────────────────────────
 // Edit Exam Modal
@@ -202,6 +204,31 @@ export default function SchedulePage() {
   const [deletingExamId, setDeletingExamId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
+  // ── Create Teacher Subject modal state ──
+  const [showTeacherSubjectModal, setShowTeacherSubjectModal] = useState(false);
+  const [teacherSubjectForm, setTeacherSubjectForm] = useState({
+    teacherWalletAddress: "",
+    subjectCode: "",
+    subjectName: "",
+    academicYear: "",
+    semester: "",
+    batches: "",
+    department: "",
+  });
+
+  // ── Create New Credential modal state ──
+  const [showCredentialModal, setShowCredentialModal] = useState(false);
+  const [credentialForm, setCredentialForm] = useState({
+    studentAddress: "",
+    subjectName: "",
+    studentName: "",
+    grade: "",
+    marks: "",
+  });
+
+  // ── Selected subject for component viewer ──
+  const [viewComponentsSubject, setViewComponentsSubject] = useState("");
+
   // ── Data hooks ──
   // 1. Get all students to derive batch list
   const { data: studentsData, loading: studentsLoading, error: studentsError, refetch: refetchStudents } =
@@ -224,6 +251,23 @@ export default function SchedulePage() {
     updateSchedule,
     deleteSchedule,
   } = useExamScheduleManagement();
+
+  // 4. All subjects (for dropdown)
+  const { data: subjectsData, loading: subjectsLoading } = useGetAllSubjects();
+  const allSubjects: Subject[] = subjectsData?.getAllSubjects || [];
+
+  // 5. Subject components (for viewer)
+  const { data: componentsData, loading: componentsLoading } = useGetSubjectComponents(
+    viewComponentsSubject,
+    { skip: !viewComponentsSubject }
+  );
+  const subjectComponents: Component[] = componentsData?.getSubjectComponents || [];
+
+  // 6. Create teacher subject mutation
+  const [createTeacherSubject, { loading: creatingTeacherSubject }] = useCreateTeacherSubject();
+
+  // 7. Create new credential mutation
+  const [createNewCredential, { loading: creatingCredential }] = useCreateNewCredential();
 
   // ── Derive unique batches from studentId (first 4 chars, e.g. "23CS") ──
   const { batches, studentsByBatch } = useMemo(() => {
@@ -349,6 +393,102 @@ export default function SchedulePage() {
       }
     } catch (error: any) {
       alert(`Error deleting exam: ${error.message}`);
+    }
+  };
+
+  // ── Create Teacher Subject handler ──
+  const handleCreateTeacherSubject = async () => {
+    if (
+      !teacherSubjectForm.teacherWalletAddress ||
+      !teacherSubjectForm.subjectCode ||
+      !teacherSubjectForm.subjectName ||
+      !teacherSubjectForm.academicYear ||
+      !teacherSubjectForm.semester ||
+      !teacherSubjectForm.batches
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const result = await createTeacherSubject({
+        variables: {
+          input: {
+            teacherWalletAddress: teacherSubjectForm.teacherWalletAddress,
+            subjectCode: teacherSubjectForm.subjectCode,
+            subjectName: teacherSubjectForm.subjectName,
+            academicYear: teacherSubjectForm.academicYear,
+            semester: teacherSubjectForm.semester,
+            batches: teacherSubjectForm.batches.split(",").map((b) => b.trim()),
+            department: teacherSubjectForm.department || undefined,
+          },
+        },
+      });
+
+      if (result.data?.createTeacherSubject) {
+        showSuccess(`Teacher-subject assignment created successfully!`);
+        setShowTeacherSubjectModal(false);
+        setTeacherSubjectForm({
+          teacherWalletAddress: "",
+          subjectCode: "",
+          subjectName: "",
+          academicYear: "",
+          semester: "",
+          batches: "",
+          department: "",
+        });
+      }
+    } catch (error: any) {
+      alert(`Error creating teacher-subject: ${error.message}`);
+    }
+  };
+
+  // ── Create New Credential handler ──
+  const handleCreateNewCredential = async () => {
+    if (
+      !credentialForm.studentAddress ||
+      !credentialForm.subjectName ||
+      !credentialForm.studentName ||
+      !credentialForm.grade
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const credentialData = JSON.stringify({
+        studentName: credentialForm.studentName,
+        grade: credentialForm.grade,
+        marks: credentialForm.marks ? parseInt(credentialForm.marks) : undefined,
+      });
+
+      const result = await createNewCredential({
+        variables: {
+          input: {
+            studentAddress: credentialForm.studentAddress,
+            subjectName: credentialForm.subjectName,
+            credentialData,
+          },
+        },
+      });
+
+      if (result.data?.createNewCredential?.success) {
+        showSuccess(
+          `Credential created! Tx: ${result.data.createNewCredential.txHash?.slice(0, 10)}...`
+        );
+        setShowCredentialModal(false);
+        setCredentialForm({
+          studentAddress: "",
+          subjectName: "",
+          studentName: "",
+          grade: "",
+          marks: "",
+        });
+      } else {
+        alert(result.data?.createNewCredential?.message || "Failed to create credential");
+      }
+    } catch (error: any) {
+      alert(`Error creating credential: ${error.message}`);
     }
   };
 
@@ -512,16 +652,35 @@ export default function SchedulePage() {
                         />
                       </div>
 
-                      {/* Subject */}
+                      {/* Subject (dropdown from getAllSubjects) */}
                       <div>
                         <label className="block text-xs font-medium text-gray-300 mb-1">Subject *</label>
-                        <input
-                          type="text"
-                          value={examDetails.subject}
-                          onChange={(e) => setExamDetails({ ...examDetails, subject: e.target.value })}
-                          className="w-full px-2.5 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none"
-                          placeholder="e.g., Blockchain Technology"
-                        />
+                        {subjectsLoading ? (
+                          <div className="w-full px-2.5 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-lg text-gray-400">
+                            Loading subjects...
+                          </div>
+                        ) : allSubjects.length > 0 ? (
+                          <select
+                            value={examDetails.subject}
+                            onChange={(e) => setExamDetails({ ...examDetails, subject: e.target.value })}
+                            className="w-full px-2.5 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none"
+                          >
+                            <option value="">Select a subject</option>
+                            {allSubjects.filter(s => s.isActive).map((subj) => (
+                              <option key={subj._id} value={subj.subjectName}>
+                                {subj.subjectName}{subj.credits ? ` (${subj.credits} cr)` : ""}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value={examDetails.subject}
+                            onChange={(e) => setExamDetails({ ...examDetails, subject: e.target.value })}
+                            className="w-full px-2.5 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none"
+                            placeholder="e.g., Blockchain Technology"
+                          />
+                        )}
                       </div>
 
                       {/* Exam Type + Venue */}
@@ -843,6 +1002,97 @@ export default function SchedulePage() {
           </div>
         </div>
 
+        {/* ── Subject Components Viewer ── */}
+        <div className="px-6 pb-8">
+          <div
+            className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6"
+            style={{ backgroundColor: "#12121a" }}
+          >
+            <h2 className="text-2xl font-bold text-white mb-2">Subject Components</h2>
+            <p className="text-gray-400 text-sm mb-4">Select a subject to view its grading components</p>
+
+            <div className="flex items-center gap-4 mb-6">
+              <select
+                value={viewComponentsSubject}
+                onChange={(e) => setViewComponentsSubject(e.target.value)}
+                className="flex-1 max-w-xs px-3 py-2 text-sm bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none"
+              >
+                <option value="">Select subject...</option>
+                {allSubjects.filter(s => s.isActive).map((subj) => (
+                  <option key={subj._id} value={subj.subjectName}>
+                    {subj.subjectName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {viewComponentsSubject && (
+              componentsLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                </div>
+              ) : subjectComponents.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">No components registered for {viewComponentsSubject}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Component</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Weightage</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Max Marks</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Status</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Created</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {subjectComponents.map((comp) => (
+                        <tr key={comp._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="py-3 px-4 text-white font-medium">{comp.componentName}</td>
+                          <td className="py-3 px-4 text-gray-300">{comp.weightage != null ? `${comp.weightage}%` : "—"}</td>
+                          <td className="py-3 px-4 text-gray-300">{comp.maxMarks ?? "—"}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${comp.isActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                              {comp.isActive ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-400 text-sm">
+                            {comp.createdAt ? new Date(comp.createdAt).toLocaleDateString("en-IN") : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* ── Action Buttons Row ── */}
+        <div className="px-6 pb-8 flex flex-wrap gap-4">
+          <button
+            onClick={() => setShowTeacherSubjectModal(true)}
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors text-white font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Assign Subject to Teacher
+          </button>
+          <button
+            onClick={() => setShowCredentialModal(true)}
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors text-white font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            Create New Credential
+          </button>
+        </div>
+
         {/* ── Edit Modal ── */}
         {editingExam && (
           <EditExamModal
@@ -882,6 +1132,215 @@ export default function SchedulePage() {
                 >
                   Delete
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Create Teacher Subject Modal ── */}
+        {showTeacherSubjectModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-900 rounded-2xl border border-white/10 p-6 w-full max-w-lg shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-6">Assign Subject to Teacher</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Teacher Wallet Address *</label>
+                  <input
+                    type="text"
+                    value={teacherSubjectForm.teacherWalletAddress}
+                    onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, teacherWalletAddress: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                    placeholder="0x..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject Code *</label>
+                    <input
+                      type="text"
+                      value={teacherSubjectForm.subjectCode}
+                      onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, subjectCode: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                      placeholder="MATH101"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject Name *</label>
+                    {allSubjects.length > 0 ? (
+                      <select
+                        value={teacherSubjectForm.subjectName}
+                        onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, subjectName: e.target.value })}
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="">Select subject</option>
+                        {allSubjects.filter(s => s.isActive).map((subj) => (
+                          <option key={subj._id} value={subj.subjectName}>{subj.subjectName}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={teacherSubjectForm.subjectName}
+                        onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, subjectName: e.target.value })}
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                        placeholder="Mathematics"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Academic Year *</label>
+                    <input
+                      type="text"
+                      value={teacherSubjectForm.academicYear}
+                      onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, academicYear: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                      placeholder="2025-26"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Semester *</label>
+                    <select
+                      value={teacherSubjectForm.semester}
+                      onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, semester: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                    >
+                      <option value="">Select</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s.toString()}>Sem {s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Department</label>
+                    <input
+                      type="text"
+                      value={teacherSubjectForm.department}
+                      onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, department: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                      placeholder="CS"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Batches * (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={teacherSubjectForm.batches}
+                    onChange={(e) => setTeacherSubjectForm({ ...teacherSubjectForm, batches: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none"
+                    placeholder="A, B, C"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowTeacherSubjectModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateTeacherSubject}
+                    disabled={creatingTeacherSubject}
+                    className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition-colors text-white"
+                  >
+                    {creatingTeacherSubject ? "Creating..." : "Assign Subject"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Create New Credential Modal ── */}
+        {showCredentialModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-900 rounded-2xl border border-white/10 p-6 w-full max-w-lg shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-6">Create New Credential</h3>
+              <p className="text-gray-400 text-sm mb-4">Issue an initial blockchain credential for a student. Data will be uploaded to IPFS and anchored on-chain.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Student Wallet Address *</label>
+                  <input
+                    type="text"
+                    value={credentialForm.studentAddress}
+                    onChange={(e) => setCredentialForm({ ...credentialForm, studentAddress: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                    placeholder="0x..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Subject *</label>
+                  {allSubjects.length > 0 ? (
+                    <select
+                      value={credentialForm.subjectName}
+                      onChange={(e) => setCredentialForm({ ...credentialForm, subjectName: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                    >
+                      <option value="">Select subject</option>
+                      {allSubjects.filter(s => s.isActive).map((subj) => (
+                        <option key={subj._id} value={subj.subjectName}>{subj.subjectName}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={credentialForm.subjectName}
+                      onChange={(e) => setCredentialForm({ ...credentialForm, subjectName: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                      placeholder="Mathematics"
+                    />
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Student Name *</label>
+                    <input
+                      type="text"
+                      value={credentialForm.studentName}
+                      onChange={(e) => setCredentialForm({ ...credentialForm, studentName: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Grade *</label>
+                    <select
+                      value={credentialForm.grade}
+                      onChange={(e) => setCredentialForm({ ...credentialForm, grade: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                    >
+                      <option value="">Select</option>
+                      {["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Marks (optional)</label>
+                  <input
+                    type="number"
+                    value={credentialForm.marks}
+                    onChange={(e) => setCredentialForm({ ...credentialForm, marks: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-emerald-400 focus:outline-none"
+                    placeholder="92"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowCredentialModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateNewCredential}
+                    disabled={creatingCredential}
+                    className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-lg transition-colors text-white"
+                  >
+                    {creatingCredential ? "Creating..." : "Issue Credential"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

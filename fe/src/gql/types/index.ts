@@ -243,6 +243,7 @@ export interface UpdateTeacherSubjectInput {
   subjectName?: string;
   batches?: string[];
   semester?: string;
+  isActive?: boolean;
 }
 
 export interface DeleteTeacherSubjectResponse {
@@ -536,5 +537,46 @@ export interface IsCredentialValidResponse {
   isCredentialValid: boolean;
 }
 
+// ── getAllSubjects / getSubjectComponents ──
+export interface GetAllSubjectsResponse {
+  getAllSubjects: Subject[];
+}
 
+export interface GetSubjectComponentsResponse {
+  getSubjectComponents: Component[];
+}
 
+// ── createTeacherSubject ──
+export interface CreateTeacherSubjectInput {
+  teacherWalletAddress: string;
+  subjectCode: string;
+  subjectName: string;
+  academicYear: string;
+  semester: string;
+  batches: string[];
+  department?: string;
+}
+
+export interface CreateTeacherSubjectResponse {
+  createTeacherSubject: TeacherSubject & {
+    assignedBy?: string;
+    assignedAt?: string;
+  };
+}
+
+// ── createNewCredential (blockchain + IPFS) ──
+export interface CreateNewCredentialInput {
+  studentAddress: string;
+  subjectName: string;
+  credentialData: string;
+  validityPeriod?: number;
+}
+
+export interface CreateNewCredentialResponse {
+  createNewCredential: {
+    success: boolean;
+    txHash: string;
+    ipfsHash: string;
+    message: string;
+  };
+}

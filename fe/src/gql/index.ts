@@ -15,6 +15,7 @@ export * from './queries/examSchedule';
 export * from './queries/students';
 export * from './queries/teacher';
 export * from './queries/credentialManagement';
+export * from './queries/subjects';
 
 // Export all types
 export * from './types';
