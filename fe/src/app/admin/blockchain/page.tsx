@@ -131,12 +131,8 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
   const { data: allSubjectsData, loading: allSubjectsLoading } = useGetAllSubjects();
   const allSubjectsList = allSubjectsData?.getAllSubjects || [];
 
-  // Fetch teacher's assigned subjects for "remove" mode
-  const { data: teacherSubjectsData, loading: teacherSubjectsLoading } = useGetTeacherSubjectsByTeacher(
-    selectedTeacher,
-    { skip: !selectedTeacher || action !== 'remove' }
-  );
-  const teacherSubjectsList = teacherSubjectsData?.getTeacherSubjectsByTeacher || [];
+  const selectedTeacherObj = teachers.find(t => t.walletAddress === selectedTeacher);
+  const teacherAssignedSubjects = selectedTeacherObj?.assignedSubjects || [];
 
   const handleActionChange = (newAction: 'assign' | 'remove') => {
     setAction(newAction);
@@ -164,7 +160,7 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
 
   if (!isOpen) return null;
 
-  const subjectDropdownLoading = action === 'assign' ? allSubjectsLoading : teacherSubjectsLoading;
+  const subjectDropdownLoading = action === 'assign' && allSubjectsLoading;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -226,8 +222,8 @@ function SubjectManagementModal({ isOpen, onClose, onAssign, onRemove, teachers,
                   ? allSubjectsList.filter(s => s.isActive).map((s) => (
                     <option key={s._id} value={s.subjectName}>{s.subjectName}</option>
                   ))
-                  : teacherSubjectsList.map((ts) => (
-                    <option key={ts._id} value={ts.subjectName}>{ts.subjectName} ({ts.subjectCode})</option>
+                  : teacherAssignedSubjects.map((subj) => (
+                    <option key={subj} value={subj}>{subj}</option>
                   ))
                 }
               </select>
@@ -709,11 +705,22 @@ export default function AdminBlockchainPage() {
 
   const handleAssignSubject = async (teacherAddress: string, subject: string) => {
     try {
+      if (!window.ethereum) throw new Error('MetaMask not found.');
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new Contract(GRADING_SSI_CONTRACT_ADDRESS, GRADING_SSI_ABI, signer);
+
+      const tx = await contract.assignSubjectToTeacher(teacherAddress, subject);
+      const txHash = tx.hash;
+      if (!txHash) throw new Error('No transaction hash returned.');
+      await tx.wait();
+
       const result = await assignSubject({
         variables: {
           input: {
             teacherAddress,
-            subject
+            subject,
+            transactionHash: txHash
           }
         }
       });
@@ -721,20 +728,35 @@ export default function AdminBlockchainPage() {
       if (result.data?.assignSubjectToTeacher.success) {
         alert(`Successfully assigned subject ${subject} to teacher`);
       } else {
-        alert(`Failed to assign subject: ${result.data?.assignSubjectToTeacher.error || 'Unknown error'}`);
+        alert(`Blockchain tx succeeded but backend failed to assign subject: ${result.data?.assignSubjectToTeacher.error || 'Unknown error'}`);
       }
     } catch (error: any) {
-      alert(`Error: ${error.message}`);
+      if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+        alert('Transaction was rejected in MetaMask.');
+      } else {
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
   const handleRemoveSubject = async (teacherAddress: string, subject: string) => {
     try {
+      if (!window.ethereum) throw new Error('MetaMask not found.');
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new Contract(GRADING_SSI_CONTRACT_ADDRESS, GRADING_SSI_ABI, signer);
+
+      const tx = await contract.removeSubjectFromTeacher(teacherAddress, subject);
+      const txHash = tx.hash;
+      if (!txHash) throw new Error('No transaction hash returned.');
+      await tx.wait();
+
       const result = await removeSubject({
         variables: {
           input: {
             teacherAddress,
-            subject
+            subject,
+            transactionHash: txHash
           }
         }
       });
@@ -742,10 +764,14 @@ export default function AdminBlockchainPage() {
       if (result.data?.removeSubjectFromTeacher.success) {
         alert(`Successfully removed subject ${subject} from teacher`);
       } else {
-        alert(`Failed to remove subject: ${result.data?.removeSubjectFromTeacher.error || 'Unknown error'}`);
+        alert(`Blockchain tx succeeded but backend failed to remove subject: ${result.data?.removeSubjectFromTeacher.error || 'Unknown error'}`);
       }
     } catch (error: any) {
-      alert(`Error: ${error.message}`);
+      if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+        alert('Transaction was rejected in MetaMask.');
+      } else {
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
@@ -1245,13 +1271,13 @@ export default function AdminBlockchainPage() {
           </div>
 
           <div className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden" style={{ backgroundColor: '#12121a' }}>
-            {tsLoading ? (
+            {usersLoading ? (
               <div className="flex justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
               </div>
-            ) : allTeacherSubjects.length === 0 ? (
+            ) : teachers.flatMap(t => t.assignedSubjects || []).length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-400">No teacher-subject assignments found</p>
+                <p className="text-gray-400">No teacher-subject assignments found on blockchain</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -1260,47 +1286,51 @@ export default function AdminBlockchainPage() {
                     <tr className="border-b border-white/10">
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Teacher</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Subject</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Code</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Year</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Sem</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Batches</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Status</th>
                       <th className="text-right py-3 px-4 text-sm font-medium text-gray-400">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {allTeacherSubjects.map((ts: TeacherSubject) => (
-                      <tr key={ts._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    {teachers.flatMap(teacher => 
+                      (teacher.assignedSubjects || []).map(subject => ({
+                        id: `${teacher.walletAddress}-${subject}`,
+                        teacherName: teacher.name,
+                        teacherWalletAddress: teacher.walletAddress,
+                        subjectName: subject
+                      }))
+                    ).map((ts) => (
+                      <tr key={ts.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="py-3 px-4">
                           <div className="text-white text-sm font-medium">{ts.teacherName || 'Unknown'}</div>
                           <div className="text-gray-500 text-xs font-mono">{ts.teacherWalletAddress?.slice(0, 8)}...</div>
                         </td>
                         <td className="py-3 px-4 text-white text-sm">{ts.subjectName}</td>
-                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.subjectCode}</td>
-                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.academicYear || '—'}</td>
-                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.semester || '—'}</td>
-                        <td className="py-3 px-4 text-gray-300 text-sm">{ts.batches?.join(', ') || '—'}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ts.isActive !== false ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                            }`}>
-                            {ts.isActive !== false ? 'Active' : 'Inactive'}
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
+                            Active
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => openEditTeacherSubject(ts)}
+                              onClick={() => {
+                                // Instead of DB CRUD edit/delete, pre-fill remove subject in standard modal
+                                setShowSubjectModal(true);
+                              }}
                               className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                              title="Edit"
+                              title="Manage"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
                             </button>
                             <button
-                              onClick={() => setDeletingTeacherSubjectId(ts._id)}
+                              onClick={() => {
+                                handleRemoveSubject(ts.teacherWalletAddress, ts.subjectName);
+                              }}
                               className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete"
+                              title="Delete from Blockchain"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

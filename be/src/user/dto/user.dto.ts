@@ -49,6 +49,9 @@ export class UserDto {
 
   @Field({ nullable: true })
   isVerified?: boolean;
+
+  @Field(() => [String], { nullable: true })
+  assignedSubjects?: string[];
 }
 
 @InputType()

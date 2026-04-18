@@ -149,60 +149,91 @@ export class TeacherSubjectsResponse {
 @InputType()
 export class IssueBlockchainCredentialInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   studentAddress!: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   subject!: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   credentialData!: String; // JSON string of credential data
 }
 
 @InputType()
 export class RevokeCredentialInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   studentAddress!: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   subject!: string;
 }
 
 @InputType()
 export class AssignRoleInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   userAddress!: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   role!: string; // 'TEACHER_ROLE' or 'STUDENT_ROLE'
 }
 
 @InputType()
 export class SubjectAssignmentInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   teacherAddress!: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   subject!: string;
+
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  transactionHash?: string;
 }
 
 @InputType()
 export class LinkWalletInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   walletAddress!: string;
 }
 
 @InputType()
 export class RegisterDIDInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   did!: string;
 }
 
 @InputType()
 export class VerifyCredentialInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   studentAddress!: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty()
   subject!: string;
 }
 

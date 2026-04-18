@@ -118,9 +118,12 @@ export class BlockchainResolver {
         };
       }
 
+      console.log('--- assignSubjectToTeacher input ---', input);
+
       const txHash = await this.blockchainService.assignSubjectToTeacher(
         input.teacherAddress,
         input.subject,
+        input.transactionHash,
       );
 
       // Update user record
@@ -157,6 +160,7 @@ export class BlockchainResolver {
       const txHash = await this.blockchainService.removeSubjectFromTeacher(
         input.teacherAddress,
         input.subject,
+        input.transactionHash,
       );
 
       // Update user record

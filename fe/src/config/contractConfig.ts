@@ -17,4 +17,24 @@ export const GRADING_SSI_ABI = [
         outputs: [],
         stateMutability: 'nonpayable',
     },
+    {
+        name: 'assignSubjectToTeacher',
+        type: 'function',
+        inputs: [
+            { name: 'teacher', type: 'address', internalType: 'address' },
+            { name: 'subject', type: 'string', internalType: 'string' }
+        ],
+        outputs: [],
+        stateMutability: 'nonpayable'
+    },
+    {
+        name: 'removeSubjectFromTeacher',
+        type: 'function',
+        inputs: [
+            { name: 'teacher', type: 'address', internalType: 'address' },
+            { name: 'subject', type: 'string', internalType: 'string' }
+        ],
+        outputs: [],
+        stateMutability: 'nonpayable'
+    }
 ] as const;

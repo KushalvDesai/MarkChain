@@ -278,6 +278,13 @@
                 <li><a href="#utility">🔧 Utility</a></li>
             </ul>
         </nav>
+        <div style="margin-bottom: 24px; padding: 12px 20px; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.06);">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="filter-uncompleted" onchange="toggleUncompleted(this.checked)" style="width: 16px; height: 16px;" />
+                <span style="font-weight: 600; font-size: 14px; color: #334155;">Show only pending APIs (hide completed)</span>
+            </label>
+        </div>
+
 
         <!-- ======================== AUTH ======================== -->
         <div class="section" id="auth">
@@ -289,6 +296,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">generateNonce</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-public">Public</span>
                 </div>
                 <p class="op-desc">Generate a nonce for wallet signature verification. First step of login flow.</p>
@@ -335,6 +343,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">verifySignature</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-public">Public</span>
                 </div>
                 <p class="op-desc">Verify wallet signature with nonce. Returns JWT access token + user info.</p>
@@ -416,6 +425,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getUsersByRole</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -446,6 +456,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getUserProfile</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get a user's profile by wallet address.</p>
@@ -473,6 +484,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getAllUsers</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -501,6 +513,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">updateUserProfile</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Update the current user's name and/or studentId.</p>
@@ -544,6 +557,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">sendOTPForVerification</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Send OTP to student's institute email for identity verification.</p>
@@ -565,6 +579,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">verifyOTPAndUpdateProfile</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Verify OTP and update student profile with name &amp; studentId.</p>
@@ -639,6 +654,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getMyBlockchainStatus</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get blockchain status of the currently logged-in user.</p>
@@ -661,6 +677,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getMyAssignedSubjects</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get subjects assigned to the current teacher (returns [] for non-teachers).</p>
@@ -676,6 +693,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getMySubjectCredential</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get a student's credential for a specific subject from the blockchain + IPFS.</p>
@@ -699,6 +717,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getMyBlockchainCredentials</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get all blockchain credentials for the current student.</p>
@@ -722,6 +741,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">verifyBlockchainCredential</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-public">Public</span>
                 </div>
                 <p class="op-desc">Publicly verify a student's credential by wallet address + subject.</p>
@@ -748,6 +768,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getBlockchainNetworkInfo</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-public">Public</span>
                 </div>
                 <p class="op-desc">Get blockchain network connection info (contract address, chain ID, etc).</p>
@@ -769,6 +790,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">testIPFSConnection</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Test IPFS service connectivity. Returns true/false.</p>
@@ -784,6 +806,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getAllSubjects</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get all registered subjects from the database.</p>
@@ -809,6 +832,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getSubjectComponents</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Get all components for a specific subject.</p>
@@ -835,6 +859,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">linkWalletAddress</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Link a wallet address to the authenticated user.</p>
@@ -879,6 +904,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">assignBlockchainRole</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -902,6 +928,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">assignSubjectToTeacher</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -926,6 +953,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">removeSubjectFromTeacher</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -950,6 +978,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">revokeBlockchainCredential</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -974,6 +1003,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">issueBlockchainCredential</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">TEACHER</span>
                 </div>
@@ -1005,6 +1035,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">createSubject</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1043,6 +1074,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">registerComponent</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1081,6 +1113,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">createNewCredential</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">TEACHER / ADMIN</span>
                 </div>
@@ -1540,6 +1573,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">isCredentialValid</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <p class="op-desc">Check if a student's credential is valid (not revoked and not expired).</p>
@@ -1759,6 +1793,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">createTeacherSubject</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1802,6 +1837,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getAllTeacherSubjects</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1830,6 +1866,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getTeacherSubjectsByTeacher</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN / TEACHER</span>
                 </div>
@@ -1855,6 +1892,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">updateTeacherSubject</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1889,6 +1927,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">deleteTeacherSubject</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1907,6 +1946,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">revokeCredential</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1929,6 +1969,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">createExamSchedule</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -1974,6 +2015,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getAllExamSchedules</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <div class="code-wrap">
@@ -2001,6 +2043,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getExamScheduleById</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                 </div>
                 <div class="code-wrap">
@@ -2027,6 +2070,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">updateExamSchedule</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -2056,6 +2100,7 @@
                 <div class="card-header">
                     <span class="badge badge-mutation">Mutation</span>
                     <span class="op-name">deleteExamSchedule</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -2074,6 +2119,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getStudentsByBatch</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ADMIN</span>
                 </div>
@@ -2105,6 +2151,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getTeacherCourseSetup</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">TEACHER</span>
                 </div>
@@ -2134,6 +2181,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getTeacherStudents</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">TEACHER</span>
                 </div>
@@ -2161,6 +2209,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">getTeacherCredentials</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">TEACHER</span>
                 </div>
@@ -2407,6 +2456,7 @@
                 <div class="card-header">
                     <span class="badge badge-query">Query</span>
                     <span class="op-name">generateNonce</span>
+                    <span class="badge" style="background: #22c55e; color: white;">✅ Completed</span>
                     <span class="badge badge-auth">🔒 Auth</span>
                     <span class="badge badge-role">ALL ROLES</span>
                 </div>
@@ -2484,6 +2534,22 @@
     </div>
 
     <script>
+        function toggleUncompleted(showOnlyPending) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                // If it doesn't have card-header, it's not an API card
+                const header = card.querySelector('.card-header');
+                if (!header) return;
+                
+                const isCompleted = header.innerHTML.includes('✅ Completed');
+                if (showOnlyPending && isCompleted) {
+                    card.style.display = 'none';
+                } else {
+                    card.style.display = 'block';
+                }
+            });
+        }
+
         function copyCode(btn) {
             const code = btn.nextElementSibling.textContent;
             navigator.clipboard.writeText(code).then(() => {
