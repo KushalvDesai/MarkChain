@@ -104,20 +104,42 @@ export class UserService {
     return regex.test(studentId);
   }
 
+  private normalizeStudentId(studentId: string): string {
+    if (typeof studentId !== 'string') {
+      throw new BadRequestException('Student ID is required');
+    }
+
+    const normalized = studentId.trim().toUpperCase();
+    if (!normalized) {
+      throw new BadRequestException('Student ID is required');
+    }
+
+    return normalized;
+  }
+
   private generateStudentEmail(studentId: string): string {
     return `${studentId.toLowerCase()}@charusat.edu.in`;
   }
 
+  private getErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+    return fallback;
+  }
+
   async sendOTPForVerification(walletAddress: string, studentId: string): Promise<{ success: boolean; message: string; email?: string }> {
     try {
+      const normalizedStudentId = this.normalizeStudentId(studentId);
+
       // Validate student ID format
-      if (!this.validateStudentIdFormat(studentId)) {
+      if (!this.validateStudentIdFormat(normalizedStudentId)) {
         throw new BadRequestException('Invalid student ID format. Expected format: 23CSXXX or 24CSXXX or 25CSXXX');
       }
 
       // Check if student ID is already taken by another user
       const existingUser = await this.userModel.findOne({
-        studentId: studentId,
+        studentId: normalizedStudentId,
         walletAddress: { $ne: walletAddress.toLowerCase() }
       });
 
@@ -138,7 +160,7 @@ export class UserService {
       // Generate OTP and set expiry (10 minutes)
       const otp = this.generateOTP();
       const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-      const email = this.generateStudentEmail(studentId);
+      const email = this.generateStudentEmail(normalizedStudentId);
 
       // Update user with OTP details
       await this.userModel.findOneAndUpdate(
@@ -153,7 +175,7 @@ export class UserService {
       );
 
       // Send OTP email
-      const emailSent = await this.emailService.sendOTP(email, otp, studentId);
+      const emailSent = await this.emailService.sendOTP(email, otp, normalizedStudentId);
 
       if (!emailSent) {
         throw new Error('Failed to send OTP email');
@@ -168,7 +190,7 @@ export class UserService {
       console.error('Error sending OTP:', error);
       return {
         success: false,
-        message: error.message || 'Failed to send OTP'
+        message: this.getErrorMessage(error, 'Failed to send OTP')
       };
     }
   }
@@ -205,15 +227,19 @@ export class UserService {
         throw new BadRequestException('OTP has expired');
       }
 
+      const normalizedStudentId = updateData.studentId
+        ? this.normalizeStudentId(updateData.studentId)
+        : undefined;
+
       // Validate student ID format if provided
-      if (updateData.studentId && !this.validateStudentIdFormat(updateData.studentId)) {
-        throw new BadRequestException('Invalid student ID format. Expected format: 23CSXXX or 24CSXXX');
+      if (normalizedStudentId && !this.validateStudentIdFormat(normalizedStudentId)) {
+        throw new BadRequestException('Invalid student ID format. Expected format: 23CSXXX or 24CSXXX or 25CSXXX');
       }
 
       // Check for duplicate student ID if provided
-      if (updateData.studentId) {
+      if (normalizedStudentId) {
         const existingUser = await this.userModel.findOne({
-          studentId: updateData.studentId,
+          studentId: normalizedStudentId,
           walletAddress: { $ne: walletAddress.toLowerCase() }
         });
         if (existingUser) {
@@ -226,7 +252,7 @@ export class UserService {
       const updatePayload: any = {};
       for (const key of allowedFields) {
         if (updateData[key] !== undefined) {
-          updatePayload[key] = updateData[key];
+          updatePayload[key] = key === 'studentId' ? normalizedStudentId : updateData[key];
         }
       }
 
@@ -260,7 +286,7 @@ export class UserService {
       console.error('Error verifying OTP:', error);
       return {
         success: false,
-        message: error.message || 'Failed to verify OTP'
+        message: this.getErrorMessage(error, 'Failed to verify OTP')
       };
     }
   }
@@ -454,7 +480,7 @@ export class UserService {
       console.error('Error sending email OTP:', error);
       return {
         success: false,
-        message: error.message || 'Failed to send OTP'
+        message: this.getErrorMessage(error, 'Failed to send OTP')
       };
     }
   }
@@ -546,7 +572,7 @@ export class UserService {
       console.error('Error verifying email OTP:', error);
       return {
         success: false,
-        message: error.message || 'Failed to verify OTP'
+        message: this.getErrorMessage(error, 'Failed to verify OTP')
       };
     }
   }

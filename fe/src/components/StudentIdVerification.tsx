@@ -15,12 +15,13 @@ export default function StudentIdVerification() {
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
+    const normalizedStudentId = studentId.trim().toUpperCase();
     
     try {
       const result = await sendOTP({
         variables: {
           input: {
-            studentId: studentId.trim()
+            studentId: normalizedStudentId
           }
         }
       });
@@ -40,6 +41,7 @@ export default function StudentIdVerification() {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
+    const normalizedStudentId = studentId.trim().toUpperCase();
     
     try {
       const result = await verifyOTP({
@@ -47,7 +49,7 @@ export default function StudentIdVerification() {
           input: {
             otp: otp.trim(),
             name: name.trim(),
-            studentId: studentId.trim()
+            studentId: normalizedStudentId
           }
         }
       });

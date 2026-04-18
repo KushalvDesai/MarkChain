@@ -5,37 +5,37 @@ import { IsString, IsNumber, IsOptional, Min, Max, Length, Matches } from 'class
 @ObjectType()
 export class CourseSetupDto {
   @Field()
-  totalSubjects: number;
+  totalSubjects!: number;
 
   @Field()
-  totalBatches: number;
+  totalBatches!: number;
 
   @Field()
-  totalStudents: number;
+  totalStudents!: number;
 
   @Field(() => [SubjectInfoDto])
-  subjects: SubjectInfoDto[];
+  subjects!: SubjectInfoDto[];
 }
 
 @ObjectType()
 export class SubjectInfoDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  subjectCode: string;
+  subjectCode!: string;
 
   @Field()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
-  semester: string;
+  semester!: string;
 
   @Field(() => [String])
-  batches: string[];
+  batches!: string[];
 
   @Field({ nullable: true })
   department?: string;
@@ -47,33 +47,33 @@ export class UploadMarksInput {
   @Field()
   @IsString()
   @Matches(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid Ethereum wallet address' })
-  studentWalletAddress: string;
+  studentWalletAddress!: string;
 
   @Field()
   @IsString()
   @Length(2, 100, { message: 'Subject must be between 2 and 100 characters' })
-  subject: string;
+  subject!: string;
 
   @Field()
   @IsNumber()
   @Min(0, { message: 'Marks cannot be negative' })
   @Max(100, { message: 'Marks cannot exceed 100' })
-  marks: number;
+  marks!: number;
 
   @Field()
   @IsString()
   @Matches(/^(midterm|final|quiz|assignment|practical)$/, { message: 'Invalid exam type' })
-  examType: string;
+  examType!: string;
 
   @Field()
   @IsString()
   @Matches(/^\d{4}-\d{4}$/, { message: 'Academic year must be in format YYYY-YYYY' })
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
   @IsString()
   @Matches(/^(1|2|3|4|5|6|7|8)$/, { message: 'Semester must be between 1 and 8' })
-  semester: string;
+  semester!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -91,10 +91,10 @@ export class UploadMarksInput {
 @ObjectType()
 export class UploadMarksResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field({ nullable: true })
   credentialId?: string;
@@ -107,19 +107,19 @@ export class UploadMarksResponse {
 @ObjectType()
 export class TeacherStudentDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  walletAddress: string;
+  walletAddress!: string;
 
   @Field()
-  did: string;
+  did!: string;
 
   @Field()
-  name: string;
+  name!: string;
 
   @Field()
-  studentId: string;
+  studentId!: string;
 
   @Field({ nullable: true })
   email?: string;
@@ -128,41 +128,41 @@ export class TeacherStudentDto {
   batch?: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 }
 
 // Teacher Credentials DTOs
 @ObjectType()
 export class TeacherCredentialDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  studentDID: string;
+  studentDID!: string;
 
   @Field()
-  studentName: string;
+  studentName!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 
   @Field()
-  marks: number;
+  marks!: number;
 
   @Field({ nullable: true })
   grade?: string;
 
   @Field()
-  examType: string;
+  examType!: string;
 
   @Field()
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
-  semester: string;
+  semester!: string;
 
   @Field()
-  isRevoked: boolean;
+  isRevoked!: boolean;
 
   @Field({ nullable: true })
   blockchainTxHash?: string;
@@ -171,5 +171,5 @@ export class TeacherCredentialDto {
   ipfsHash?: string;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 }

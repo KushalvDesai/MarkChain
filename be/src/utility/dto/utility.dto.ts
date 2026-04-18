@@ -5,47 +5,47 @@ import { IsString, IsOptional } from 'class-validator';
 @ObjectType()
 export class HealthCheckResponse {
   @Field()
-  status: string;
+  status!: string;
 
   @Field()
-  timestamp: string;
+  timestamp!: string;
 
   @Field()
-  uptime: number;
+  uptime!: number;
 
   @Field()
-  version: string;
+  version!: string;
 
   @Field()
-  environment: string;
+  environment!: string;
 }
 
 // System Info DTOs
 @ObjectType()
 export class SystemInfoResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field()
-  nodeVersion: string;
+  nodeVersion!: string;
 
   @Field()
-  platform: string;
+  platform!: string;
 
   @Field()
-  architecture: string;
+  architecture!: string;
 
   @Field()
-  totalMemory: string;
+  totalMemory!: string;
 
   @Field()
-  freeMemory: string;
+  freeMemory!: string;
 
   @Field()
-  uptime: number;
+  uptime!: number;
 }
 
 // Hash Utility DTOs
@@ -53,7 +53,7 @@ export class SystemInfoResponse {
 export class HashDataDto {
   @Field()
   @IsString()
-  data: string;
+  data!: string;
 
   @Field({ defaultValue: 'sha256' })
   @IsOptional()
@@ -64,19 +64,19 @@ export class HashDataDto {
 @ObjectType()
 export class HashResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field()
-  hash: string;
+  hash!: string;
 
   @Field()
-  algorithm: string;
+  algorithm!: string;
 
   @Field()
-  originalData: string;
+  originalData!: string;
 }
 
 // Validate DID DTOs
@@ -84,22 +84,22 @@ export class HashResponse {
 export class ValidateDIDDto {
   @Field()
   @IsString()
-  did: string;
+  did!: string;
 }
 
 @ObjectType()
 export class ValidateDIDResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field()
-  isValid: boolean;
+  isValid!: boolean;
 
   @Field()
-  did: string;
+  did!: string;
 
   @Field({ nullable: true })
   method?: string;

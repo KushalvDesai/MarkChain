@@ -4,28 +4,28 @@ import { IsString, Matches } from 'class-validator';
 @ObjectType()
 export class NotificationDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  recipientDID: string;
+  recipientDID!: string;
 
   @Field()
-  recipientWalletAddress: string;
+  recipientWalletAddress!: string;
 
   @Field()
-  type: string;
+  type!: string;
 
   @Field()
-  title: string;
+  title!: string;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field({ nullable: true })
   metadata?: string;
 
   @Field()
-  isRead: boolean;
+  isRead!: boolean;
 
   @Field({ nullable: true })
   readAt?: Date;
@@ -43,7 +43,7 @@ export class NotificationDto {
   relatedEntityType?: string;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 }
 
 @InputType()
@@ -51,14 +51,14 @@ export class MarkNotificationReadInput {
   @Field()
   @IsString()
   @Matches(/^[a-f0-9]{24}$/, { message: 'Invalid MongoDB ObjectId for notification' })
-  notificationId: string;
+  notificationId!: string;
 }
 
 @ObjectType()
 export class MarkNotificationReadResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 }

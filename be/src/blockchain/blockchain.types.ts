@@ -4,13 +4,13 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 @ObjectType()
 export class BlockchainCredential {
   @Field()
-  ipfsHash: string;
+  ipfsHash!: string;
 
   @Field()
-  issuer: string;
+  issuer!: string;
 
   @Field()
-  updatedAt: string;
+  updatedAt!: string;
 
   @Field({ nullable: true })
   studentName?: string;
@@ -28,16 +28,16 @@ export class BlockchainCredential {
 @ObjectType()
 export class CredentialData {
   @Field()
-  studentName: string;
+  studentName!: string;
 
   @Field()
-  studentId: string;
+  studentId!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 
   @Field()
-  grade: string;
+  grade!: string;
 
   @Field({ nullable: true })
   marks?: number;
@@ -46,13 +46,13 @@ export class CredentialData {
   semester?: string;
 
   @Field()
-  institution: string;
+  institution!: string;
 
   @Field()
-  issueDate: string;
+  issueDate!: string;
 
   @Field()
-  issuer: string;
+  issuer!: string;
 
   @Field({ nullable: true })
   additionalNotes?: string;
@@ -70,37 +70,37 @@ export class BlockchainUserStatus {
   blockchainRole?: string;
 
   @Field()
-  didRegistered: boolean;
+  didRegistered!: boolean;
 
   @Field()
-  hasBlockchainRole: boolean;
+  hasBlockchainRole!: boolean;
 
   @Field(() => [String])
-  assignedSubjects: string[];
+  assignedSubjects!: string[];
 }
 
 @ObjectType()
 export class NetworkInfo {
   @Field()
-  contractAddress: string;
+  contractAddress!: string;
 
   @Field()
-  walletAddress: string;
+  walletAddress!: string;
 
   @Field()
-  network: string;
+  network!: string;
 
   @Field()
-  chainId: string;
+  chainId!: string;
 
   @Field()
-  isConnected: boolean;
+  isConnected!: boolean;
 }
 
 @ObjectType()
 export class TransactionResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field({ nullable: true })
   transactionHash?: string;
@@ -115,13 +115,13 @@ export class TransactionResponse {
 @ObjectType()
 export class RoleResponse {
   @Field()
-  hasRole: boolean;
+  hasRole!: boolean;
 
   @Field()
-  role: string;
+  role!: string;
 
   @Field()
-  userAddress: string;
+  userAddress!: string;
 }
 
 @ObjectType()
@@ -130,96 +130,96 @@ export class DIDResponse {
   did?: string;
 
   @Field()
-  exists: boolean;
+  exists!: boolean;
 
   @Field()
-  userAddress: string;
+  userAddress!: string;
 }
 
 @ObjectType()
 export class TeacherSubjectsResponse {
   @Field(() => [String])
-  subjects: string[];
+  subjects!: string[];
 
   @Field()
-  teacherAddress: string;
+  teacherAddress!: string;
 }
 
 // Input Types
 @InputType()
 export class IssueBlockchainCredentialInput {
   @Field()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 
   @Field()
-  credentialData: String; // JSON string of credential data
+  credentialData!: String; // JSON string of credential data
 }
 
 @InputType()
 export class RevokeCredentialInput {
   @Field()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 }
 
 @InputType()
 export class AssignRoleInput {
   @Field()
-  userAddress: string;
+  userAddress!: string;
 
   @Field()
-  role: string; // 'TEACHER_ROLE' or 'STUDENT_ROLE'
+  role!: string; // 'TEACHER_ROLE' or 'STUDENT_ROLE'
 }
 
 @InputType()
 export class SubjectAssignmentInput {
   @Field()
-  teacherAddress: string;
+  teacherAddress!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 }
 
 @InputType()
 export class LinkWalletInput {
   @Field()
-  walletAddress: string;
+  walletAddress!: string;
 }
 
 @InputType()
 export class RegisterDIDInput {
   @Field()
-  did: string;
+  did!: string;
 }
 
 @InputType()
 export class VerifyCredentialInput {
   @Field()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 }
 
 // NEW TYPES FOR WEEK 1 APIs
 @ObjectType()
 export class SubjectResponse {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
-  blockchainHash: string;
+  blockchainHash!: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 
   @Field({ nullable: true })
   createdBy?: string;
@@ -231,28 +231,28 @@ export class SubjectResponse {
   credits?: number;
 
   @Field()
-  createdAt: string;
+  createdAt!: string;
 
   @Field()
-  updatedAt: string;
+  updatedAt!: string;
 }
 
 @ObjectType()
 export class ComponentResponse {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  componentName: string;
+  componentName!: string;
 
   @Field()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
-  blockchainHash: string;
+  blockchainHash!: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 
   @Field({ nullable: true })
   createdBy?: string;
@@ -264,10 +264,10 @@ export class ComponentResponse {
   maxMarks?: number;
 
   @Field()
-  createdAt: string;
+  createdAt!: string;
 
   @Field()
-  updatedAt: string;
+  updatedAt!: string;
 }
 
 @InputType()
@@ -275,7 +275,7 @@ export class CreateSubjectInput {
   @Field(() => String)
   @IsString()
   @IsNotEmpty()
-  subjectName: string;
+  subjectName!: string;
 
   @Field(() => String, { nullable: true })
   @IsString()
@@ -290,7 +290,7 @@ export class CreateSubjectInput {
   @Field(() => String)
   @IsString()
   @IsNotEmpty()
-  transactionHash: string;
+  transactionHash!: string;
 }
 
 @InputType()
@@ -298,12 +298,12 @@ export class RegisterComponentInput {
   @Field(() => String)
   @IsString()
   @IsNotEmpty()
-  subjectName: string;
+  subjectName!: string;
 
   @Field(() => String)
   @IsString()
   @IsNotEmpty()
-  componentName: string;
+  componentName!: string;
 
   @Field({ nullable: true })
   @IsNumber()
@@ -319,37 +319,37 @@ export class RegisterComponentInput {
 @ObjectType()
 export class SubjectWithComponentsResponse {
   @Field()
-  txHash: string;
+  txHash!: string;
 
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field(() => SubjectResponse)
-  subject: SubjectResponse;
+  subject!: SubjectResponse;
 }
 
 @ObjectType()
 export class ComponentWithTxResponse {
   @Field()
-  txHash: string;
+  txHash!: string;
 
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field(() => ComponentResponse)
-  component: ComponentResponse;
+  component!: ComponentResponse;
 }
 
 @InputType()
 export class CreateCredentialInput {
   @Field()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
-  credentialData: string;
+  credentialData!: string;
 
   @Field({ nullable: true, defaultValue: 31536000 })
   validityPeriod?: number;
@@ -358,13 +358,13 @@ export class CreateCredentialInput {
 @ObjectType()
 export class CredentialTxResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  txHash: string;
+  txHash!: string;
 
   @Field()
-  ipfsHash: string;
+  ipfsHash!: string;
 
   @Field({ nullable: true })
   message?: string;
@@ -374,16 +374,16 @@ export class CredentialTxResponse {
 @InputType()
 export class gradeComponentInput {
   @Field()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
-  componentName: string;
+  componentName!: string;
 
   @Field()
-  gradeData: string; // JSON STRING 
+  gradeData!: string; // JSON STRING 
 }
 
 // ==================== NEW TYPES FOR REMAINING APIs ====================
@@ -393,53 +393,53 @@ export class RemoveComponentInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  componentName: string;
+  componentName!: string;
 }
 
 @InputType()
 export class BatchUpdateComponentInput {
   @Field(() => [String])
-  studentAddresses: string[];
+  studentAddresses!: string[];
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  componentName: string;
+  componentName!: string;
 
   @Field(() => [String])
-  gradeDataArray: string[]; // Array of JSON strings, one per student
+  gradeDataArray!: string[]; // Array of JSON strings, one per student
 }
 
 @InputType()
 export class ComponentQueryInput {
   @Field()
   @IsString()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
   @IsString()
-  componentName: string;
+  componentName!: string;
 }
 
 @InputType()
 export class StudentSubjectInput {
   @Field()
   @IsString()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
   @IsString()
-  subject: string;
+  subject!: string;
 }
 
 @InputType()
@@ -447,42 +447,42 @@ export class RegisterDIDForUserInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  userAddress: string;
+  userAddress!: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  did: string;
+  did!: string;
 }
 
 @InputType()
 export class UpdateComponentGradeInput {
   @Field()
   @IsString()
-  studentAddress: string;
+  studentAddress!: string;
 
   @Field()
   @IsString()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
   @IsString()
-  componentName: string;
+  componentName!: string;
 
   @Field()
   @IsString()
-  gradeData: string; // JSON string of grade data
+  gradeData!: string; // JSON string of grade data
 }
 
 @InputType()
 export class RenounceRoleInput {
   @Field()
   @IsString()
-  role: string; // 'TEACHER_ROLE' or 'STUDENT_ROLE'
+  role!: string; // 'TEACHER_ROLE' or 'STUDENT_ROLE'
 
   @Field()
   @IsString()
-  callerConfirmation: string; // caller's own address for safety
+  callerConfirmation!: string; // caller's own address for safety
 }
 
 // ==================== NEW OUTPUT TYPES ====================
@@ -490,76 +490,76 @@ export class RenounceRoleInput {
 @ObjectType()
 export class CredentialStatsResponse {
   @Field()
-  exists: boolean;
+  exists!: boolean;
 
   @Field()
-  isValid: boolean;
+  isValid!: boolean;
 
   @Field()
-  componentsGraded: number;
+  componentsGraded!: number;
 
   @Field()
-  totalComponentsInSubject: number;
+  totalComponentsInSubject!: number;
 
   @Field()
-  completionPercentage: number;
+  completionPercentage!: number;
 }
 
 @ObjectType()
 export class ComponentHistoryEntry {
   @Field()
-  componentName: string;
+  componentName!: string;
 
   @Field()
-  ipfsHash: string;
+  ipfsHash!: string;
 
   @Field()
-  updatedBy: string;
+  updatedBy!: string;
 
   @Field()
-  timestamp: string;
+  timestamp!: string;
 
   @Field()
-  credentialVersion: string;
+  credentialVersion!: string;
 }
 
 @ObjectType()
 export class CredentialDetailResponse {
   @Field()
-  ipfsHash: string;
+  ipfsHash!: string;
 
   @Field()
-  version: string;
+  version!: string;
 
   @Field()
-  totalComponents: string;
+  totalComponents!: string;
 
   @Field()
-  createdAt: string;
+  createdAt!: string;
 
   @Field()
-  lastUpdatedAt: string;
+  lastUpdatedAt!: string;
 
   @Field()
-  expiresAt: string;
+  expiresAt!: string;
 
   @Field()
-  revoked: boolean;
+  revoked!: boolean;
 
   @Field()
-  isExpired: boolean;
+  isExpired!: boolean;
 }
 
 @ObjectType()
 export class BatchUpdateResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  txHash: string;
+  txHash!: string;
 
   @Field()
-  studentsProcessed: number;
+  studentsProcessed!: number;
 
   @Field({ nullable: true })
   message?: string;

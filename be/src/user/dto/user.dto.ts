@@ -11,16 +11,16 @@ registerEnumType(UserRole, {
 @ObjectType()
 export class UserDto {
   @Field(() => ID)
-  _id: string;
+  _id!: string;
 
   @Field()
-  walletAddress: string;
+  walletAddress!: string;
 
   @Field()
-  did: string;
+  did!: string;
 
   @Field(() => UserRole)
-  role: UserRole;
+  role!: UserRole;
 
   @Field({ nullable: true })
   name?: string;
@@ -29,16 +29,16 @@ export class UserDto {
   studentId?: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 
   @Field({ nullable: true })
   lastLogin?: Date;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   // OTP verification fields
   @Field({ nullable: true })
@@ -70,7 +70,12 @@ export class UpdateUserProfileDto {
 @InputType()
 export class SendOTPDto {
   @Field()
-  studentId: string;
+  @IsString()
+  @Length(7, 7)
+  @Matches(/^(23|24|25)CS\d{3}$/, {
+    message: 'Invalid student ID format. Expected format: 23CSXXX or 24CSXXX or 25CSXXX',
+  })
+  studentId!: string;
 }
 
 @InputType()
@@ -79,26 +84,26 @@ export class VerifyOTPDto {
   @IsString()
   @Length(6, 6)
   @Matches(/^\d{6}$/, { message: 'OTP must be 6 digits' })
-  otp: string;
+  otp!: string;
 
   @Field()
   @IsString()
   @Length(2, 100)
-  name: string;
+  name!: string;
 
   @Field()
   @IsString()
   @Matches(/^[A-Z0-9]{5,15}$/)
-  studentId: string;
+  studentId!: string;
 }
 
 @ObjectType()
 export class OTPResponseDto {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field({ nullable: true })
   email?: string;
@@ -107,10 +112,10 @@ export class OTPResponseDto {
 @ObjectType()
 export class VerifyOTPResponseDto {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field(() => UserDto, { nullable: true })
   user?: UserDto;
@@ -121,7 +126,7 @@ export class VerifyOTPResponseDto {
 export class SendEmailOTPDto {
   @Field()
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
+  email!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -135,13 +140,13 @@ export class SendEmailOTPDto {
 export class VerifyEmailOTPDto {
   @Field()
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
+  email!: string;
 
   @Field()
   @IsString()
   @Length(6, 6, { message: 'OTP must be exactly 6 characters' })
   @Matches(/^\d{6}$/, { message: 'OTP must be 6 digits' })
-  otp: string;
+  otp!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -154,10 +159,10 @@ export class VerifyEmailOTPDto {
 @ObjectType()
 export class EmailOTPResponseDto {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field({ nullable: true })
   email?: string;
@@ -166,10 +171,10 @@ export class EmailOTPResponseDto {
 @ObjectType()
 export class VerifyEmailOTPResponseDto {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field(() => UserDto, { nullable: true })
   user?: UserDto;
