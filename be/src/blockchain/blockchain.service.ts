@@ -136,24 +136,47 @@ export class BlockchainService {
   }
 
   // Subject Management Functions
-  async assignSubjectToTeacher(teacherAddress: string, subject: string): Promise<string> {
+  async assignSubjectToTeacher(teacherAddress: string, subject: string, transactionHash?: string): Promise<string> {
     try {
-      const tx = await this.contract.assignSubjectToTeacher(teacherAddress, subject);
-      await tx.wait();
-      this.logger.log(`Subject ${subject} assigned to teacher ${teacherAddress}`);
-      return tx.hash;
+      console.log('assignSubjectToTeacher CALLED WITH:', { teacherAddress, subject, transactionHash });
+      if (transactionHash) {
+        if (!/^0x[a-fA-F0-9]{64}$/.test(transactionHash)) {
+          throw new Error('Invalid transaction hash format.');
+        }
+        const txReceipt = await this.provider.getTransactionReceipt(transactionHash);
+        if (!txReceipt) throw new Error('Transaction not found on blockchain.');
+        if (txReceipt.status === 0) throw new Error('Transaction failed on blockchain');
+        this.logger.log(`Transaction verified. Subject ${subject} assigned to teacher ${teacherAddress}`);
+        return transactionHash;
+      } else {
+        const tx = await this.contract.assignSubjectToTeacher(teacherAddress, subject);
+        await tx.wait();
+        this.logger.log(`Subject ${subject} assigned to teacher ${teacherAddress}`);
+        return tx.hash;
+      }
     } catch (error) {
       this.logger.error(`Failed to assign subject to teacher: ${error.message}`);
       throw error;
     }
   }
 
-  async removeSubjectFromTeacher(teacherAddress: string, subject: string): Promise<string> {
+  async removeSubjectFromTeacher(teacherAddress: string, subject: string, transactionHash?: string): Promise<string> {
     try {
-      const tx = await this.contract.removeSubjectFromTeacher(teacherAddress, subject);
-      await tx.wait();
-      this.logger.log(`Subject ${subject} removed from teacher ${teacherAddress}`);
-      return tx.hash;
+      if (transactionHash) {
+        if (!/^0x[a-fA-F0-9]{64}$/.test(transactionHash)) {
+          throw new Error('Invalid transaction hash format.');
+        }
+        const txReceipt = await this.provider.getTransactionReceipt(transactionHash);
+        if (!txReceipt) throw new Error('Transaction not found on blockchain.');
+        if (txReceipt.status === 0) throw new Error('Transaction failed on blockchain');
+        this.logger.log(`Transaction verified. Subject ${subject} removed from teacher ${teacherAddress}`);
+        return transactionHash;
+      } else {
+        const tx = await this.contract.removeSubjectFromTeacher(teacherAddress, subject);
+        await tx.wait();
+        this.logger.log(`Subject ${subject} removed from teacher ${teacherAddress}`);
+        return tx.hash;
+      }
     } catch (error) {
       this.logger.error(`Failed to remove subject from teacher: ${error.message}`);
       throw error;

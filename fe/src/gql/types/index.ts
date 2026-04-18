@@ -25,6 +25,7 @@ export interface User {
   email?: string;
   studentId?: string;
   subjects?: string[];
+  assignedSubjects?: string[];
   isActive?: boolean;
   lastLogin?: string;
 }
@@ -100,6 +101,7 @@ export interface AssignRoleInput {
 export interface SubjectAssignmentInput {
   teacherAddress: string;
   subject: string;
+  transactionHash?: string;
 }
 
 export interface RevokeCredentialInput {

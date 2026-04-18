@@ -41,6 +41,7 @@ type UserDto {
   otp: String
   otpExpiry: DateTime
   isVerified: Boolean
+  assignedSubjects: [String!]
 }
 
 """
@@ -499,6 +500,7 @@ input AssignBlockchainRoleInput {
 input SubjectAssignmentInput {
   teacherAddress: String!
   subject: String!
+  transactionHash: String
 }
 
 input RevokeCredentialInput {
