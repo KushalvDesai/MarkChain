@@ -10,22 +10,22 @@ registerEnumType(UserRole, {
 @ObjectType()
 export class NonceResponse {
   @Field()
-  nonce: string;
+  nonce!: string;
 
   @Field()
-  message: string;
+  message!: string;
 }
 
 @ObjectType()
 export class UserInfo {
   @Field()
-  walletAddress: string;
+  walletAddress!: string;
 
   @Field()
-  did: string;
+  did!: string;
 
   @Field(() => UserRole)
-  role: UserRole;
+  role!: UserRole;
 
   @Field({ nullable: true })
   name?: string;
@@ -37,10 +37,10 @@ export class UserInfo {
 @ObjectType()
 export class AuthResponse {
   @Field()
-  accessToken: string;
+  accessToken!: string;
 
   @Field(() => UserInfo)
-  user: UserInfo;
+  user!: UserInfo;
 }
 
 @InputType()
@@ -49,17 +49,17 @@ export class VerifySignatureInput {
   @IsString()
   @IsNotEmpty()
   @Matches(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid Ethereum wallet address' })
-  walletAddress: string;
+  walletAddress!: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
   @Matches(/^0x[a-fA-F0-9]+$/, { message: 'Invalid signature format' })
-  signature: string;
+  signature!: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
   @Length(32, 128, { message: 'Invalid nonce format' })
-  nonce: string;
+  nonce!: string;
 }

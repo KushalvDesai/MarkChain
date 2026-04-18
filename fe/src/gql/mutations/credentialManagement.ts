@@ -64,3 +64,15 @@ export const REGISTER_COMPONENT = gql`
     }
   }
 `;
+
+// CREATE NEW CREDENTIAL (blockchain + IPFS)
+export const CREATE_NEW_CREDENTIAL = gql`
+  mutation CreateNewCredential($input: CreateNewCredentialInput!) {
+    createNewCredential(input: $input) {
+      success
+      txHash
+      ipfsHash
+      message
+    }
+  }
+`;

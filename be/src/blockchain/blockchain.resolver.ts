@@ -537,8 +537,8 @@ export class BlockchainResolver {
     @Context() context,
   ): Promise<any> {
     try {
-      const currentUser = context.req.user;
-      if (currentUser.role !== 'ADMIN') {
+      const currentUser = context.req?.user;
+      if (!currentUser || currentUser.role !== 'ADMIN') {
         throw new Error('Only admins can register components');
       }
 

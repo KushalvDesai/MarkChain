@@ -7,21 +7,21 @@ export class AssignBlockchainRoleInput {
   @Field()
   @IsString()
   @Matches(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid Ethereum wallet address' })
-  userWalletAddress: string;
+  userWalletAddress!: string;
 
   @Field()
   @IsString()
   @IsEnum(['TEACHER_ROLE', 'STUDENT_ROLE', 'ADMIN_ROLE'], { message: 'Role must be TEACHER_ROLE, STUDENT_ROLE, or ADMIN_ROLE' })
-  role: string; // 'TEACHER_ROLE', 'STUDENT_ROLE'
+  role!: string; // 'TEACHER_ROLE', 'STUDENT_ROLE'
 }
 
 @ObjectType()
 export class AssignBlockchainRoleResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field({ nullable: true })
   txHash?: string;
@@ -33,34 +33,34 @@ export class CreateTeacherSubjectInput {
   @Field()
   @IsString()
   @Matches(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid Ethereum wallet address' })
-  teacherWalletAddress: string;
+  teacherWalletAddress!: string;
 
   @Field()
   @IsString()
   @Length(2, 20, { message: 'Subject code must be between 2 and 20 characters' })
   @Matches(/^[A-Z0-9-]+$/, { message: 'Subject code must be uppercase alphanumeric with hyphens' })
-  subjectCode: string;
+  subjectCode!: string;
 
   @Field()
   @IsString()
   @Length(3, 100, { message: 'Subject name must be between 3 and 100 characters' })
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
   @IsString()
   @Matches(/^\d{4}-\d{4}$/, { message: 'Academic year must be in format YYYY-YYYY (e.g., 2024-2025)' })
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
   @IsString()
   @Matches(/^(1|2|3|4|5|6|7|8)$/, { message: 'Semester must be a number between 1 and 8' })
-  semester: string;
+  semester!: string;
 
   @Field(() => [String])
   @IsArray()
   @ArrayMinSize(1, { message: 'At least one batch must be specified' })
   @IsString({ each: true })
-  batches: string[];
+  batches!: string[];
 
   @Field({ nullable: true })
   @IsOptional()
@@ -74,7 +74,7 @@ export class UpdateTeacherSubjectInput {
   @Field()
   @IsString()
   @Matches(/^[a-f0-9]{24}$/, { message: 'Invalid MongoDB ObjectId' })
-  subjectId: string;
+  subjectId!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -122,37 +122,37 @@ export class UpdateTeacherSubjectInput {
 @ObjectType()
 export class TeacherSubjectDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  teacherDID: string;
+  teacherDID!: string;
 
   @Field()
-  teacherWalletAddress: string;
+  teacherWalletAddress!: string;
 
   @Field()
-  teacherName: string;
+  teacherName!: string;
 
   @Field()
-  subjectCode: string;
+  subjectCode!: string;
 
   @Field()
-  subjectName: string;
+  subjectName!: string;
 
   @Field()
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
-  semester: string;
+  semester!: string;
 
   @Field(() => [String])
-  batches: string[];
+  batches!: string[];
 
   @Field({ nullable: true })
   department?: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 
   @Field({ nullable: true })
   assignedBy?: string;
@@ -161,10 +161,10 @@ export class TeacherSubjectDto {
   assignedAt?: Date;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 // Revoke Credential DTOs
@@ -173,7 +173,7 @@ export class AdminRevokeCredentialInput {
   @Field()
   @IsString()
   @Matches(/^[a-f0-9]{24}$/, { message: 'Invalid MongoDB ObjectId' })
-  credentialId: string;
+  credentialId!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -185,10 +185,10 @@ export class AdminRevokeCredentialInput {
 @ObjectType()
 export class AdminRevokeCredentialResponse {
   @Field()
-  success: boolean;
+  success!: boolean;
 
   @Field()
-  message: string;
+  message!: string;
 
   @Field({ nullable: true })
   credentialId?: string;
@@ -200,63 +200,63 @@ export class CreateExamScheduleInput {
   @Field()
   @IsString()
   @Length(2, 100)
-  subject: string;
+  subject!: string;
 
   @Field()
   @IsString()
   @Length(3, 100)
-  examName: string;
+  examName!: string;
 
   @Field()
   @IsString()
   @IsEnum(['midterm', 'final', 'quiz', 'assignment', 'practical'], { message: 'Invalid exam type' })
-  examType: string;
+  examType!: string;
 
   @Field()
   @IsDateString({}, { message: 'Invalid date format' })
-  examDate: Date;
+  examDate!: Date;
 
   @Field()
   @IsNumber()
   @Min(15, { message: 'Duration must be at least 15 minutes' })
   @Max(480, { message: 'Duration cannot exceed 8 hours (480 minutes)' })
-  duration: number;
+  duration!: number;
 
   @Field()
   @IsNumber()
   @Min(1, { message: 'Total marks must be at least 1' })
   @Max(200, { message: 'Total marks cannot exceed 200' })
-  totalMarks: number;
+  totalMarks!: number;
 
   @Field()
   @IsNumber()
   @Min(0, { message: 'Passing marks cannot be negative' })
-  passingMarks: number;
+  passingMarks!: number;
 
   @Field()
   @IsString()
   @Length(2, 100)
-  venue: string;
+  venue!: string;
 
   @Field()
   @IsString()
   @Matches(/^0x[a-fA-F0-9]{40}$/)
-  teacherWalletAddress: string;
+  teacherWalletAddress!: string;
 
   @Field()
   @IsString()
   @Matches(/^\d{4}-\d{4}$/)
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
   @IsString()
   @Matches(/^(1|2|3|4|5|6|7|8)$/)
-  semester: string;
+  semester!: string;
 
   @Field()
   @IsString()
   @Length(1, 20)
-  batch: string;
+  batch!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -270,7 +270,7 @@ export class UpdateExamScheduleInput {
   @Field()
   @IsString()
   @Matches(/^[a-f0-9]{24}$/)
-  examId: string;
+  examId!: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -343,83 +343,83 @@ export class UpdateExamScheduleInput {
 @ObjectType()
 export class ExamScheduleDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  subject: string;
+  subject!: string;
 
   @Field()
-  examName: string;
+  examName!: string;
 
   @Field()
-  examType: string;
+  examType!: string;
 
   @Field()
-  examDate: Date;
+  examDate!: Date;
 
   @Field()
-  duration: number;
+  duration!: number;
 
   @Field()
-  totalMarks: number;
+  totalMarks!: number;
 
   @Field()
-  passingMarks: number;
+  passingMarks!: number;
 
   @Field()
-  venue: string;
+  venue!: string;
 
   @Field()
-  teacherDID: string;
+  teacherDID!: string;
 
   @Field()
-  academicYear: string;
+  academicYear!: string;
 
   @Field()
-  semester: string;
+  semester!: string;
 
   @Field()
-  batch: string;
+  batch!: string;
 
   @Field()
-  status: string;
+  status!: string;
 
   @Field({ nullable: true })
   description?: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 // View Students by Batch DTOs
 @ObjectType()
 export class StudentByBatchDto {
   @Field()
-  _id: string;
+  _id!: string;
 
   @Field()
-  walletAddress: string;
+  walletAddress!: string;
 
   @Field()
-  did: string;
+  did!: string;
 
   @Field()
-  name: string;
+  name!: string;
 
   @Field()
-  studentId: string;
+  studentId!: string;
 
   @Field({ nullable: true })
   email?: string;
 
   @Field()
-  isActive: boolean;
+  isActive!: boolean;
 
   @Field({ nullable: true })
   batch?: string;

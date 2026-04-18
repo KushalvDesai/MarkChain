@@ -1,12 +1,35 @@
 import { gql } from '@apollo/client';
 
+export const CREATE_TEACHER_SUBJECT = gql`
+  mutation CreateTeacherSubject($input: CreateTeacherSubjectInput!) {
+    createTeacherSubject(input: $input) {
+      _id
+      teacherDID
+      teacherWalletAddress
+      teacherName
+      subjectCode
+      subjectName
+      academicYear
+      semester
+      batches
+      department
+      isActive
+      assignedBy
+      assignedAt
+    }
+  }
+`;
+
 export const UPDATE_TEACHER_SUBJECT = gql`
   mutation UpdateTeacherSubject($input: UpdateTeacherSubjectInput!) {
     updateTeacherSubject(input: $input) {
       _id
+      subjectCode
       subjectName
-      batches
+      academicYear
       semester
+      batches
+      isActive
     }
   }
 `;
