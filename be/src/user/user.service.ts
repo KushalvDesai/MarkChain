@@ -100,7 +100,7 @@ export class UserService {
   }
 
   private validateStudentIdFormat(studentId: string): boolean {
-    const regex = /^(23|24|25)CS\d{3}$/;
+    const regex = /^\d{2}CS\d{3}$/;
     return regex.test(studentId);
   }
 
@@ -134,7 +134,7 @@ export class UserService {
 
       // Validate student ID format
       if (!this.validateStudentIdFormat(normalizedStudentId)) {
-        throw new BadRequestException('Invalid student ID format. Expected format: 23CSXXX or 24CSXXX or 25CSXXX');
+        throw new BadRequestException('Invalid student ID format. Expected format: XXCSXXX (e.g., 23CS001)');
       }
 
       // Check if student ID is already taken by another user

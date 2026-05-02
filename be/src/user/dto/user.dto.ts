@@ -75,8 +75,8 @@ export class SendOTPDto {
   @Field()
   @IsString()
   @Length(7, 7)
-  @Matches(/^(23|24|25)CS\d{3}$/, {
-    message: 'Invalid student ID format. Expected format: 23CSXXX or 24CSXXX or 25CSXXX',
+  @Matches(/^\d{2}CS\d{3}$/, {
+    message: 'Invalid student ID format. Expected format: XXCSXXX (e.g., 23CS001)',
   })
   studentId!: string;
 }
@@ -89,10 +89,11 @@ export class VerifyOTPDto {
   @Matches(/^\d{6}$/, { message: 'OTP must be 6 digits' })
   otp!: string;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
   @Length(2, 100)
-  name!: string;
+  name?: string;
 
   @Field()
   @IsString()
