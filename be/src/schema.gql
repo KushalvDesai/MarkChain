@@ -472,7 +472,7 @@ input SendOTPDto {
 
 input VerifyOTPDto {
   otp: String!
-  name: String!
+  name: String
   studentId: String!
 }
 

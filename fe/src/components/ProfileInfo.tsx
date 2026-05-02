@@ -76,7 +76,15 @@ export default function ProfileInfo({
       }
     } catch (error: any) {
       console.error('Error sending OTP:', error);
-      setOtpError(error.message || 'Failed to send OTP');
+      let errorMessage = error.message || 'Failed to send OTP';
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        const extensions = error.graphQLErrors[0].extensions;
+        if (extensions && extensions.response && extensions.response.message) {
+          const detailedMessage = extensions.response.message;
+          errorMessage = Array.isArray(detailedMessage) ? detailedMessage[0] : detailedMessage;
+        }
+      }
+      setOtpError(errorMessage);
     }
   };
 
@@ -96,7 +104,7 @@ export default function ProfileInfo({
         variables: {
           input: {
             otp: otp.trim(),
-            name: formData.name || profile?.name || "",
+            name: formData.name || profile?.name || undefined,
             studentId: capitalizedStudentId
           }
         }
@@ -113,7 +121,15 @@ export default function ProfileInfo({
       }
     } catch (error: any) {
       console.error('Error verifying OTP:', error);
-      setOtpError(error.message || 'Failed to verify OTP');
+      let errorMessage = error.message || 'Failed to verify OTP';
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        const extensions = error.graphQLErrors[0].extensions;
+        if (extensions && extensions.response && extensions.response.message) {
+          const detailedMessage = extensions.response.message;
+          errorMessage = Array.isArray(detailedMessage) ? detailedMessage[0] : detailedMessage;
+        }
+      }
+      setOtpError(errorMessage);
     }
   };
 

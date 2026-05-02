@@ -11,7 +11,7 @@ export interface SendOTPInput {
 
 export interface VerifyOTPInput {
   otp: string;
-  name: string;
+  name?: string;
   studentId: string;
 }
 
